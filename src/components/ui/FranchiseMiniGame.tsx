@@ -189,7 +189,7 @@ export function FranchiseMiniGame() {
           }}
           className="flex flex-col items-center text-center mb-8 will-change-transform"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold uppercase tracking-wider text-center max-w-2xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-['Condor_Med_Cond',sans-serif] font-bold uppercase tracking-wider text-center max-w-2xl mx-auto px-4">
             <span className="text-[#012169]">COMMERCIAL PORTFOLIO</span> <span className="text-[#A10728]">&</span> <span className="text-[#012169]">TERRITORY SIMULATOR</span>
           </h2>
         </div>
@@ -201,17 +201,17 @@ export function FranchiseMiniGame() {
             opacity: isVisible ? 1 : 0,
             transition: "transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 150ms, opacity 0.8s ease-out 150ms",
           }}
-          className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border-2 border-[#012169]/15 bg-[#FCF8F3] p-7 sm:p-9 shadow-[0_16px_50px_rgba(1,33,105,0.08)] text-[#012169] will-change-transform"
+          className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-[#012169]/15 bg-[#FCF8F3] p-5 sm:p-9 shadow-[0_16px_50px_rgba(1,33,105,0.08)] text-[#012169] will-change-transform"
         >
           {/* ========================================================
               SCREEN 1: START SCREEN
              ======================================================== */}
           {gameState === "start" && (
-            <div className="py-12 sm:py-14 flex flex-col items-center text-center animate-in fade-in duration-300">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-[#012169]/15 bg-white text-[#A10728] shadow-md">
-                <Rocket className="h-8 w-8 text-[#A10728]" />
+            <div className="py-10 sm:py-14 flex flex-col items-center text-center animate-in fade-in duration-300">
+              <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl border-2 border-[#012169]/15 bg-white text-[#A10728] shadow-md">
+                <Rocket className="h-7 w-7 sm:h-8 sm:w-8 text-[#A10728]" />
               </div>
-              <h3 className="mt-5 text-xl sm:text-2xl font-serif font-black text-[#012169]">
+              <h3 className="mt-5 text-xl sm:text-2xl font-['Condor_Med_Cond',sans-serif] font-black text-[#012169]">
                 READY FOR FRANCHISE FLIGHT?
               </h3>
               <p className="mt-2 max-w-md text-xs sm:text-sm text-[#012169]/80 font-sans leading-relaxed">
@@ -322,7 +322,7 @@ export function FranchiseMiniGame() {
                 <ShieldCheck className="h-3.5 w-3.5 text-[#A10728]" />
                 <span>FRANCHISE ACCREDITATION UNLOCKED</span>
               </div>
-              <h3 className="mt-3 text-2xl sm:text-3xl font-serif font-black text-[#012169]">
+              <h3 className="mt-3 text-2xl sm:text-3xl font-['Condor_Med_Cond',sans-serif] font-black text-[#012169]">
                 CONGRATULATIONS, CAPTAIN
               </h3>
               <p className="mt-2 max-w-md text-xs sm:text-sm text-[#012169]/80 font-sans leading-relaxed">

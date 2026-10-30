@@ -109,9 +109,15 @@ export function ScrollHorizontalGallery({ scrollContainerRef }: ScrollHorizontal
   // Responsive item width
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 640) setItemWidth(300);
-      else if (window.innerWidth < 768) setItemWidth(380);
-      else setItemWidth(440);
+      if (window.innerWidth < 480) {
+        setItemWidth(Math.min(300, window.innerWidth - 40));
+      } else if (window.innerWidth < 640) {
+        setItemWidth(320);
+      } else if (window.innerWidth < 768) {
+        setItemWidth(380);
+      } else {
+        setItemWidth(440);
+      }
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -134,12 +140,12 @@ export function ScrollHorizontalGallery({ scrollContainerRef }: ScrollHorizontal
     <section id="horizontal-gallery" className="relative z-20 bg-[#FCF8F3] text-[#012169]">
       {/* 300vh Scroll Container (Exact reference structure: sticks in view, translates horizontally as you scroll) */}
       <div ref={containerRef} className="relative h-[270vh]">
-        <div className="sticky top-0 h-screen w-full flex flex-col justify-between py-8 sm:py-12 overflow-hidden select-none">
+        <div className="sticky top-0 h-screen w-full flex flex-col justify-between py-4 sm:py-8 md:py-12 overflow-hidden select-none">
           {/* 1. Header Section */}
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 flex-shrink-0 z-20">
             {/* Section Title */}
-            <div className="text-center pt-2 pb-2">
-              <h2 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold uppercase tracking-tight leading-tight">
+            <div className="text-center pt-1 sm:pt-2 pb-1 sm:pb-2">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-['Condor_Med_Cond',sans-serif] font-bold uppercase tracking-tight leading-tight">
                 <span className="text-[#012169]">REAL ESTATE SERVICES</span> <span className="text-[#A10728]">&</span> <span className="text-[#012169]">SHOWCASE</span>
               </h2>
             </div>
@@ -164,7 +170,7 @@ export function ScrollHorizontalGallery({ scrollContainerRef }: ScrollHorizontal
                 {ITEMS.map((item) => (
                   <div
                     key={item.id}
-                    className="group relative flex-shrink-0 h-[460px] sm:h-[500px] md:h-[530px] rounded-3xl overflow-hidden border-2 border-[#0E1B33]/15 bg-[#0E1B33] shadow-[0_20px_50px_rgba(14,27,51,0.22)] transition-all duration-300 hover:border-[#A10728] hover:shadow-[0_24px_60px_rgba(161,7,40,0.25)] select-none"
+                    className="group relative flex-shrink-0 h-[370px] sm:h-[460px] md:h-[530px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-[#0E1B33]/15 bg-[#0E1B33] shadow-[0_20px_50px_rgba(14,27,51,0.22)] transition-all duration-300 hover:border-[#A10728] hover:shadow-[0_24px_60px_rgba(161,7,40,0.25)] select-none"
                     style={
                       {
                         width: `${itemWidth}px`,
@@ -191,9 +197,9 @@ export function ScrollHorizontalGallery({ scrollContainerRef }: ScrollHorizontal
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0E1B33]/95 via-[#0E1B33]/40 to-transparent pointer-events-none" />
 
                     {/* Bottom Content Container */}
-                    <div className="absolute bottom-6 sm:bottom-7 left-6 sm:left-7 right-6 sm:right-7 z-10 text-[#FAF9F6]">
+                    <div className="absolute bottom-4 sm:bottom-7 left-4 sm:left-7 right-4 sm:right-7 z-10 text-[#FAF9F6]">
                       {/* Title */}
-                      <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-[#FAF9F6] leading-snug group-hover:text-white transition-colors drop-shadow-md">
+                      <h3 className="font-['Condor_Med_Cond',sans-serif] text-lg sm:text-2xl md:text-3xl font-bold text-[#FAF9F6] leading-snug group-hover:text-white transition-colors drop-shadow-md">
                         {item.label}
                       </h3>
 

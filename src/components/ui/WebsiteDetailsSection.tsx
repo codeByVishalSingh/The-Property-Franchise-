@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
   X,
   CheckCircle2,
@@ -27,7 +27,7 @@ function LuxuryButton({
   variant = "primary",
 }: LuxuryButtonProps) {
   const base =
-    "relative inline-flex items-center gap-3 px-6 sm:px-8 py-3.5 text-xs font-semibold tracking-[0.18em] uppercase transition-all duration-300 cursor-pointer select-none group border";
+    "relative inline-flex items-center justify-center gap-2 sm:gap-3 px-5 sm:px-8 py-2.5 sm:py-3.5 text-[11px] sm:text-xs font-semibold tracking-[0.14em] sm:tracking-[0.18em] uppercase transition-all duration-300 cursor-pointer select-none group border rounded-full";
 
   const styles =
     variant === "primary"
@@ -49,13 +49,14 @@ function LuxuryButton({
 }
 
 // ============================================================================
-// Commercial Real Estate Dossier Data (Strictly Authentic Real Estate Details)
+// Commercial Real Estate Dossier Data (Edge-to-Edge Stacking Cards)
 // ============================================================================
-interface PropertyDossier {
+export interface PropertyDossier {
   id: string;
   categoryIndex: string;
   eyebrow: string;
   title: string;
+  displayWord: string;
   subtitle: string;
   leadText: string;
   description: string;
@@ -65,14 +66,16 @@ interface PropertyDossier {
   location: string;
   assetType: string;
   specs: { label: string; value: string }[];
+  statPills: { stat: string; label: string; note: string }[];
 }
 
-const DOSSIERS: PropertyDossier[] = [
+export const DOSSIERS: PropertyDossier[] = [
   {
     id: "chapter-01",
     categoryIndex: "01",
     eyebrow: "PRIME COMMERCIAL ASSETS",
     title: "Class-A Trophy Towers & Headquarter Landmarks",
+    displayWord: "TROPHY TOWERS",
     subtitle: "Central Business District Portfolio",
     leadText:
       "Exclusive acquisition representation and institutional placement for prime commercial towers across central business districts.",
@@ -94,12 +97,18 @@ const DOSSIERS: PropertyDossier[] = [
       { label: "Occupancy Rate", value: "99.4% Leased Tenancy" },
       { label: "Classification", value: "Class-A Prime Trophy Core" },
     ],
+    statPills: [
+      { stat: "$280M+", label: "Asset Valuation", note: "Prime CBD Landmark" },
+      { stat: "850,000", label: "Gross RSF", note: "50+ Stories LEED Platinum" },
+      { stat: "99.4%", label: "Tenancy Leased", note: "Fortune 100 Anchor" },
+    ],
   },
   {
     id: "chapter-02",
     categoryIndex: "02",
     eyebrow: "CORPORATE CAMPUS NETWORKS",
     title: "Metropolitan Business Parks & Innovation Campuses",
+    displayWord: "BUSINESS CAMPUSES",
     subtitle: "Primary Technology Corridors",
     leadText:
       "Turnkey enterprise business parks and master-planned corporate facilities situated along high-growth economic corridors.",
@@ -121,12 +130,18 @@ const DOSSIERS: PropertyDossier[] = [
       { label: "Campus Buildings", value: "4 Linked Modern Pavilions" },
       { label: "Parking Allocation", value: "4.2 Per 1,000 SQ.FT" },
     ],
+    statPills: [
+      { stat: "640,000", label: "Total Footprint", note: "4 Linked Modern Pavilions" },
+      { stat: "$42.5M", label: "Deal Volume", note: "Institutional Investment Size" },
+      { stat: "4.2/1k", label: "Parking Allocation", note: "Green Commons & Solar" },
+    ],
   },
   {
     id: "chapter-03",
     categoryIndex: "03",
     eyebrow: "INDUSTRIAL INFRASTRUCTURE",
     title: "Intermodal Logistics Hubs & Supply Arteries",
+    displayWord: "LOGISTICS HUBS",
     subtitle: "Transcontinental Freight Terminals",
     leadText:
       "Institutional-grade automated distribution facilities and cross-dock freight centers positioned along critical supply chain corridors.",
@@ -148,12 +163,18 @@ const DOSSIERS: PropertyDossier[] = [
       { label: "Loading Docks", value: "128 Cross-Dock Positions" },
       { label: "Target Portfolio IRR", value: "15.4% Net to Partners" },
     ],
+    statPills: [
+      { stat: "12M+ SF", label: "Under Management", note: "Intermodal Freight Arteries" },
+      { stat: "40-Foot", label: "Clear Height", note: "Heavy Concrete Staging Aprons" },
+      { stat: "15.4%", label: "Target Portfolio IRR", note: "Triple-Net (NNN) Cash Flow" },
+    ],
   },
   {
     id: "chapter-04",
     categoryIndex: "04",
     eyebrow: "CAPITAL ADVISORY & SYNDICATION",
     title: "Institutional Syndicate & Private Capital Placements",
+    displayWord: "CAPITAL SYNDICATE",
     subtitle: "Confidential Transaction Desk",
     leadText:
       "Bilateral co-investment structures and private capital placements for family offices, institutions, and sovereign capital partners.",
@@ -175,101 +196,205 @@ const DOSSIERS: PropertyDossier[] = [
       { label: "Governance Model", value: "Institutional LP Co-Investment" },
       { label: "Minimum Placement", value: "$10,000,000 Sovereign Core" },
     ],
+    statPills: [
+      { stat: "$3.8B+", label: "Placements Facilitated", note: "Bilateral Co-Investment" },
+      { stat: "7.8%", label: "Annual Cash Yield", note: "Audited Quarterly Distributions" },
+      { stat: "$10M+", label: "Minimum Placement", note: "Sovereign Core Mandates" },
+    ],
   },
 ];
 
 // ============================================================================
-// Interactive 3D Frame Image Component (Refined Architectural Presentation)
+// Edge-to-Edge Stacking Card Component (Kigo.studio Layered Overlapping Style)
+// Details alongside 100% visible image (object-fit: contain)
 // ============================================================================
-interface Sticky3DImageFrameProps {
-  activeSlide: number;
-  dossiers: PropertyDossier[];
+interface StackedCardProps {
+  dossier: PropertyDossier;
+  index: number;
+  totalCards: number;
+  onOpenDossier: (dossier: PropertyDossier) => void;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-function Sticky3DImageFrame({ activeSlide, dossiers }: Sticky3DImageFrameProps) {
-  const frameRef = useRef<HTMLDivElement>(null);
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
+function StackedCard({
+  dossier,
+  index,
+  totalCards,
+  onOpenDossier,
+  scrollContainerRef,
+}: StackedCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isLast = index === totalCards - 1;
 
-  // Subtle 3D mouse perspective tracking
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!frameRef.current) return;
-    const rect = frameRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setRotate({ x: -y * 6, y: x * 6 });
-  };
+  // Track scroll position to subtly scale down and dim as the next card stacks over it
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    container: scrollContainerRef,
+    offset: ["start start", "end start"],
+  });
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setRotate({ x: 0, y: 0 });
-  };
-
-  const activeDossier = dossiers[activeSlide] || dossiers[0];
+  const scale = useTransform(scrollYProgress, [0, 1], [1, isLast ? 1 : 0.96]);
+  const opacity = useTransform(scrollYProgress, [0, 0.85], [1, isLast ? 1 : 0.88]);
 
   return (
     <div
-      ref={frameRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      className="relative w-full max-w-lg lg:max-w-none mx-auto select-none"
+      ref={cardRef}
       style={{
-        perspective: 1200,
+        zIndex: (index + 1) * 10,
       }}
+      className={`sticky top-[52px] sm:top-[56px] w-full ${
+        isLast ? "mb-0" : "mb-[28vh] sm:mb-[36vh]"
+      }`}
     >
-      <div
-        className="relative transition-transform duration-200 ease-out"
+      <motion.div
         style={{
-          transform: isHovered
-            ? `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale(1.015)`
-            : "rotateX(0deg) rotateY(0deg) scale(1)",
-          transformStyle: "preserve-3d",
+          scale,
+          opacity,
+          transformOrigin: "top center",
         }}
+        className="w-full min-h-[calc(100vh-56px)] flex flex-col justify-between bg-[#FCF8F3] border-t-2 border-[#012169]/15 shadow-[0_-25px_60px_rgba(1,33,105,0.22)] rounded-t-2xl sm:rounded-t-[32px] overflow-hidden"
       >
-        {/* End-to-End Full-Bleed Image Card (No outer padding or white borders) */}
-        <div className="relative w-full aspect-[4/3] sm:aspect-[4/3] lg:aspect-[1/1] max-h-[480px] overflow-hidden rounded-2xl border-2 border-[#012169]/20 bg-[#012169] shadow-[0_20px_50px_rgba(1,33,105,0.18)] transition-all duration-300 hover:border-[#A10728] hover:shadow-[0_24px_60px_rgba(161,7,40,0.22)]">
-          {/* Layered Crossfading Images - 100% Full Card Bleed */}
-          {dossiers.map((item, idx) => {
-            const isActive = idx === activeSlide;
-
-            return (
-              <div
-                key={item.id}
-                className={`absolute inset-0 transition-all duration-700 ease-out will-change-transform ${
-                  isActive
-                    ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-105 blur-[2px] pointer-events-none"
-                }`}
-              >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="h-full w-full object-cover"
-                />
+        {/* ================================================================
+            1. TOP METRICS BAR & CTA BUTTON (kigo.studio style layout)
+            ================================================================ */}
+        <div className="w-full px-4 sm:px-8 lg:px-12 pt-3.5 sm:pt-5 pb-3 border-b border-[#012169]/10 flex flex-wrap items-center justify-between gap-4 select-none bg-[#FCF8F3]/95 backdrop-blur-sm z-20 flex-shrink-0">
+          {/* Left: Metric Callouts with bold numbers */}
+          <div className="flex flex-wrap items-center gap-4 sm:gap-8 lg:gap-10">
+            {dossier.statPills.map((pill, pIdx) => (
+              <div key={pIdx} className="flex items-baseline gap-2">
+                <span className="font-['Condor_Med_Cond',sans-serif] text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#A10728] leading-none">
+                  {pill.stat}
+                </span>
+                <div>
+                  <span className="font-sans text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#012169] block leading-tight">
+                    {pill.label}
+                  </span>
+                  <span className="font-sans text-[9px] sm:text-[10px] text-[#012169]/60 hidden md:block leading-tight">
+                    {pill.note}
+                  </span>
+                </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
 
-          {/* Subtle Bottom Vignette Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#012169]/70 via-transparent to-transparent pointer-events-none" />
+          {/* Right: Primary Action CTA Button */}
+          <div className="flex-shrink-0">
+            <LuxuryButton
+              onClick={() => onOpenDossier(dossier)}
+              variant="primary"
+              className="shadow-sm hover:shadow-md"
+            >
+              {dossier.ctaLabel}
+            </LuxuryButton>
+          </div>
         </div>
-      </div>
+
+        {/* ================================================================
+            2. MAIN 2-COLUMN ALONGSIDE STAGE: DETAILS ON LEFT, FULL IMAGE ON RIGHT
+            ================================================================ */}
+        <div className="w-full flex-1 flex items-center px-4 sm:px-8 lg:px-12 py-3 sm:py-5 z-10">
+          <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12 items-center">
+            {/* ------------------------------------------------------------
+                LEFT COLUMN: Company Details, Giant Headline, Quote & Specs
+                ------------------------------------------------------------ */}
+            <div className="lg:col-span-5 flex flex-col justify-center select-none">
+              <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
+                <span className="font-sans text-[10px] sm:text-xs font-bold text-[#A10728] tracking-[0.2em] uppercase">
+                  {dossier.categoryIndex} &bull; {dossier.eyebrow}
+                </span>
+              </div>
+
+              <h3 className="font-['Condor_Med_Cond',sans-serif] text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-black uppercase tracking-tight text-[#012169] leading-[0.95] mb-2 sm:mb-3">
+                {dossier.displayWord}
+              </h3>
+
+              <p className="font-sans text-xs sm:text-[13px] font-medium leading-relaxed text-[#012169] mb-3 sm:mb-4 border-l-2 border-[#A10728] pl-3 py-1 bg-[#012169]/[0.02]">
+                {dossier.leadText}
+              </p>
+
+              {/* Specifications Matrix Grid (2x2) */}
+              <div className="grid grid-cols-2 gap-2 mb-3 sm:mb-4">
+                {dossier.specs.map((spec, sIdx) => (
+                  <div
+                    key={sIdx}
+                    className="p-2 sm:p-2.5 rounded-lg border border-[#012169]/10 bg-white/70 shadow-xs flex flex-col"
+                  >
+                    <span className="font-sans text-[9px] sm:text-[10px] text-[#012169]/60 uppercase tracking-wider">
+                      {spec.label}
+                    </span>
+                    <span className="font-mono text-[11px] sm:text-xs font-bold text-[#012169] truncate">
+                      {spec.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Feature Tags */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {dossier.features.slice(0, 3).map((feat, fIdx) => (
+                  <span
+                    key={fIdx}
+                    className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-[#012169]/15 bg-[#012169]/5 text-[#012169]"
+                  >
+                    {feat}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* ------------------------------------------------------------
+                RIGHT COLUMN: 100% Fully Visible Image with object-contain
+                ------------------------------------------------------------ */}
+            <div className="lg:col-span-7 flex items-center justify-center select-none">
+              <div className="relative w-full h-[260px] sm:h-[360px] md:h-[420px] lg:h-[480px] xl:h-[520px] rounded-2xl overflow-hidden bg-[#0A1224] border-2 border-[#012169]/20 shadow-[0_20px_50px_rgba(1,33,105,0.25)] flex items-center justify-center p-2 sm:p-3 group">
+                {/* 100% Fully Visible Image - Zero Cropping, Zero Cutting */}
+                <img
+                  src={dossier.image}
+                  alt={dossier.title}
+                  className="w-full h-full object-contain rounded-xl transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+                />
+
+                {/* Subtle Vignette Gradient for Depth */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0A1224]/80 via-transparent to-[#0A1224]/20 pointer-events-none rounded-xl" />
+
+                {/* Floating Image Metadata Strip */}
+                <div className="absolute bottom-3 sm:bottom-4 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between text-white pointer-events-none z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-[#012169]/90 backdrop-blur-md px-2.5 py-1 rounded border border-white/20">
+                      {dossier.assetType}
+                    </span>
+                    <span className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-sm">
+                      {dossier.location}
+                    </span>
+                  </div>
+                  <span className="font-mono text-[9px] sm:text-[10px] font-bold tracking-widest uppercase text-white/80 hidden sm:inline">
+                    MANDATE 0{index + 1} &bull; FULL VISUAL SPECS
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom subtle status accent */}
+        <div className="w-full border-t border-[#012169]/10 py-1.5 px-4 sm:px-8 lg:px-12 flex items-center justify-between text-[#012169]/60 font-mono text-[9px] sm:text-[10px] bg-[#FCF8F3] select-none">
+          <span>THE PROPERTY FRANCHISE &bull; ASSET SPECIFICATION CHAPTER 0{index + 1}</span>
+          <span>SCROLL DOWN TO REVEAL NEXT STACKED MANDATE &darr;</span>
+        </div>
+      </motion.div>
     </div>
   );
 }
 
 // ============================================================================
-// Main Website Details Section Component (Storytelling Experience)
+// Main Website Details Section Component (Edge-to-Edge Stacking Showcase)
 // ============================================================================
 interface WebsiteDetailsSectionProps {
   scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export function WebsiteDetailsSection({ scrollContainerRef }: WebsiteDetailsSectionProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [activeSlide, setActiveSlide] = useState(0);
-
   // Modal Inquiry Form State
   const [activeDossier, setActiveDossier] = useState<PropertyDossier | null>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -280,47 +405,6 @@ export function WebsiteDetailsSection({ scrollContainerRef }: WebsiteDetailsSect
     company: "",
     message: "",
   });
-
-  // Accurate Scroll Tracking through the tall sticky container
-  useEffect(() => {
-    const getScrollEl = () => scrollContainerRef?.current || null;
-
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-      const scrollEl = getScrollEl();
-      const rect = containerRef.current.getBoundingClientRect();
-      const containerHeight = containerRef.current.offsetHeight;
-      const viewportHeight = window.innerHeight;
-
-      // Header offset for the modal's sticky top navigation bar
-      const topOffset = scrollEl ? 56 : 0;
-      const totalScrollable = containerHeight - (viewportHeight - topOffset);
-
-      if (totalScrollable <= 0) return;
-
-      // Distance from when the sticky header pins at topOffset
-      const scrolledPastTop = topOffset - rect.top;
-      const progress = Math.max(0, Math.min(1, scrolledPastTop / totalScrollable));
-
-      // Determine active slide across 4 segments [0.0 - 0.25], [0.25 - 0.50], [0.50 - 0.75], [0.75 - 1.0]
-      const slide = Math.min(3, Math.floor(progress * 4));
-      setActiveSlide(slide);
-    };
-
-    const target = getScrollEl() || window;
-    target.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-    handleScroll();
-
-    // Re-check after 150ms in case the modal animation or layout shifted
-    const timer = setTimeout(handleScroll, 150);
-
-    return () => {
-      target.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-      clearTimeout(timer);
-    };
-  }, [scrollContainerRef]);
 
   const handleOpenDossier = (dossier: PropertyDossier) => {
     setActiveDossier(dossier);
@@ -344,96 +428,25 @@ export function WebsiteDetailsSection({ scrollContainerRef }: WebsiteDetailsSect
     }, 700);
   };
 
-  const currentDossier = DOSSIERS[activeSlide] || DOSSIERS[0];
-
   return (
     <div className="relative w-full bg-[#FCF8F3] text-[#012169] selection:bg-[#A10728] selection:text-[#FCF8F3]">
       {/* Subtle Architectural Grid Texture */}
       <div className="absolute inset-0 pointer-events-none opacity-30 bg-[linear-gradient(to_right,rgba(1,33,105,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(1,33,105,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
       {/* ====================================================================
-          STICKY SCROLL CONTAINER (Height 380vh for 4 synchronized chapters)
+          EDGE-TO-EDGE STACKED CARDS CONTAINER (Layered Overlapping Effect)
           ==================================================================== */}
-      <div ref={containerRef} className="relative h-[380vh]">
-        {/* Sticky Viewport: Pins image on Left & animates details on Right */}
-        <div className="sticky top-0 sm:top-[56px] h-screen sm:h-[calc(100vh-56px)] w-full flex flex-col justify-between py-4 sm:py-6 lg:py-8 px-5 sm:px-8 lg:px-12 overflow-hidden select-none">
-          {/* 1. TOP HEADER (Clean, Professional Single Line) */}
-          <div className="w-full max-w-7xl mx-auto border-b border-[#012169]/15 pb-3 flex items-center justify-between flex-shrink-0 z-20">
-            <h2 className="font-['Condor_Med_Cond',sans-serif] text-lg sm:text-2xl font-bold uppercase tracking-tight text-[#012169]">
-              The Property Franchise <span className="text-[#A10728]">•</span> Commercial Portfolio <span className="text-[#A10728]">&</span> Asset Architecture
-            </h2>
-          </div>
-
-          {/* 2. MAIN 2-COLUMN STORYTELLING STAGE */}
-          <div className="w-full max-w-7xl mx-auto flex-1 flex items-center my-auto z-20 py-2 sm:py-4">
-            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 xl:gap-16 items-center">
-              {/* ------------------------------------------------------------
-                  LEFT COLUMN: Sticky 3D Interactive Frame with 4 Images
-                  ------------------------------------------------------------ */}
-              <div className="lg:col-span-6 flex items-center justify-center">
-                <Sticky3DImageFrame activeSlide={activeSlide} dossiers={DOSSIERS} />
-              </div>
-
-              {/* ------------------------------------------------------------
-                  RIGHT COLUMN: Synchronized Details & Real Estate Information
-                  ------------------------------------------------------------ */}
-              <div className="lg:col-span-6 flex flex-col justify-center min-h-[360px] sm:min-h-[400px]">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentDossier.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -18 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    className="flex flex-col justify-center"
-                  >
-                    {/* Eyebrow Label */}
-                    <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#A10728]" />
-                      <span className="font-sans text-xs font-bold text-[#A10728] tracking-[0.2em] uppercase">
-                        {currentDossier.categoryIndex} &bull; {currentDossier.eyebrow}
-                      </span>
-                    </div>
-
-                    {/* Primary Condensed Heading */}
-                    <h3 className="font-['Condor_Med_Cond',sans-serif] text-2xl sm:text-3xl lg:text-4xl xl:text-[42px] font-bold uppercase tracking-tight text-[#012169] leading-[1.1] mb-3 sm:mb-4">
-                      {currentDossier.title}
-                    </h3>
-
-                    {/* Professional Real Estate Narrative (Clean Sans-Serif Typography) */}
-                    <p className="font-sans text-sm sm:text-[15px] font-medium leading-relaxed text-[#012169] mb-3 border-l-2 border-[#A10728] pl-3.5 bg-[#012169]/[0.02] py-1">
-                      {currentDossier.leadText}
-                    </p>
-
-                    <p className="font-sans text-xs sm:text-sm leading-relaxed text-[#012169]/80 mb-5 sm:mb-6">
-                      {currentDossier.description}
-                    </p>
-
-                    {/* Key Real Estate Features List */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 mb-6 sm:mb-7 border-t border-[#012169]/15 pt-3.5">
-                      {currentDossier.features.map((feat, fIdx) => (
-                        <div
-                          key={fIdx}
-                          className="flex items-center gap-2 text-xs text-[#012169] font-sans font-medium"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] flex-shrink-0" />
-                          <span>{feat}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Action Button */}
-                    <div>
-                      <LuxuryButton onClick={() => handleOpenDossier(currentDossier)}>
-                        {currentDossier.ctaLabel}
-                      </LuxuryButton>
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="relative w-full pb-16 sm:pb-24">
+        {DOSSIERS.map((dossier, idx) => (
+          <StackedCard
+            key={dossier.id}
+            dossier={dossier}
+            index={idx}
+            totalCards={DOSSIERS.length}
+            onOpenDossier={handleOpenDossier}
+            scrollContainerRef={scrollContainerRef}
+          />
+        ))}
       </div>
 
       {/* ====================================================================
@@ -442,7 +455,7 @@ export function WebsiteDetailsSection({ scrollContainerRef }: WebsiteDetailsSect
       <AnimatePresence>
         {activeDossier && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#0E1B33]/65 backdrop-blur-md overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#0E1B33]/65 backdrop-blur-md overflow-y-auto"
             onClick={handleCloseDossier}
           >
             <motion.div
@@ -451,7 +464,7 @@ export function WebsiteDetailsSection({ scrollContainerRef }: WebsiteDetailsSect
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-3xl overflow-hidden border border-[#012169]/20 bg-[#FCF8F3] text-[#012169] shadow-2xl p-6 sm:p-10 my-8"
+              className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl border border-[#012169]/20 bg-[#FCF8F3] text-[#012169] shadow-2xl p-5 sm:p-10 my-4 sm:my-8"
             >
               {/* Close Button */}
               <button

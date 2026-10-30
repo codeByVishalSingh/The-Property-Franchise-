@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useScroll, useSpring } from "framer-motion";
 import {
   Play,
   X,
@@ -78,7 +79,7 @@ export const REEL_PROPERTIES: ReelProperty[] = [
     sqft: "480,000 sq.ft",
     duration: "1:28",
     image: "/commercial_office_tower.jpg",
-    videoSrc: "/sample_video.mp4",
+    videoSrc: "/real-estate-intro.mp4",
     description:
       "A landmark Class-A commercial office skyscraper featuring 48 storeys of column-free floor plates, LEED Platinum certification, and high-speed destination elevators.",
     features: ["48 Commercial Storeys", "LEED Platinum Core", "High-Speed Elevators"],
@@ -119,7 +120,26 @@ export const REEL_PROPERTIES: ReelProperty[] = [
   },
 ];
 
-export function RealEstateReelsSection() {
+// Unified scroll window for simultaneous single-scroll reveal of all 5 video reels
+const CARD_SPECS = [
+  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "01 // RETAIL" },
+  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "02 // SUITES" },
+  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "03 // TOWERS" },
+  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "04 // CAMPUS" },
+  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "05 // LOGISTICS" },
+];
+
+export interface RealEstateReelsSectionProps {
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
+}
+
+export function RealEstateReelsSection({ scrollContainerRef }: RealEstateReelsSectionProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardsRowRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [maxCardHeight, setMaxCardHeight] = useState(560);
+
+  // Video modal state
   const [selectedProperty, setSelectedProperty] = useState<ReelProperty | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -128,165 +148,98 @@ export function RealEstateReelsSection() {
   const [likedReels, setLikedReels] = useState<Record<string, boolean>>({});
   const [inquirySent, setInquirySent] = useState(false);
 
-  // References for continuous loop & interaction
-  const sectionRef = useRef<HTMLElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const isInViewRef = useRef(false);
-  const isHoveredRef = useRef(false);
-  const isDraggingRef = useRef(false);
-  const hasMovedRef = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftStartRef = useRef(0);
-  const scrollPosRef = useRef(0);
-  const animationFrameIdRef = useRef<number | null>(null);
+  const modalVideoRef = useRef<HTMLVideoElement>(null);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const filteredProperties = REEL_PROPERTIES;
-
-  // Repeat items for an uninterrupted continuous horizontal loop
-  const repeatCount = 4;
-  const loopedProperties = Array.from({ length: repeatCount }, () => filteredProperties).flat();
-
-  // 1. Viewport detection: detect when user reaches the section
+  // Standard Instagram Reel 9:16 responsive height calculation with enlarged display
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const updateDimensions = () => {
+      if (typeof window === "undefined") return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
-    const checkVisibility = () => {
-      const rect = section.getBoundingClientRect();
-      const visible = rect.top < window.innerHeight && rect.bottom > 0;
-      isInViewRef.current = visible;
+      if (w < 640) {
+        // Mobile: large, prominent vertical Reel cards
+        const targetH = Math.min(480, Math.round(h * 0.62));
+        setMaxCardHeight(Math.max(420, targetH));
+      } else if (w < 1024) {
+        // Tablet: commanding vertical cards
+        const targetH = Math.min(540, Math.round(h * 0.66));
+        setMaxCardHeight(Math.max(470, targetH));
+      } else {
+        // Desktop 5-column grid: prominent vertical 9:16 cards filling the display
+        const availableW = Math.min(1560, w - 64);
+        const cardW = (availableW - 80) / 5;
+        const target916H = Math.round(cardW * (16 / 9));
+        // Allow cards to scale up generously while fitting comfortably within viewport height
+        const maxFitH = Math.round((h - 120) * 0.82);
+        const preferredH = Math.max(540, Math.min(620, target916H));
+        setMaxCardHeight(Math.min(maxFitH, preferredH));
+      }
     };
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isInViewRef.current = entry.isIntersecting;
-      },
-      { threshold: 0, rootMargin: "150px 0px 150px 0px" }
-    );
-
-    observer.observe(section);
-    window.addEventListener("scroll", checkVisibility, { passive: true });
-    checkVisibility();
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", checkVisibility);
-    };
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // 2. Initialize scroll position centered so it can loop seamlessly
+  // Framer Motion useScroll connected directly to modal or window container
+  const { scrollYProgress } = useScroll({
+    container: scrollContainerRef,
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Cinematic inertia spring for smooth, seamless scroll transitions
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 95,
+    damping: 22,
+    mass: 0.15,
+    restDelta: 0.0005,
+  });
+
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+    const unsubscribe = smoothProgress.on("change", (latest) => {
+      setScrollProgress(latest);
+    });
+    return () => unsubscribe();
+  }, [smoothProgress]);
 
-    // Small timeout to allow container.scrollWidth to calculate after DOM render
-    const timer = setTimeout(() => {
-      const singleSetWidth = container.scrollWidth / repeatCount;
-      if (singleSetWidth > 0) {
-        container.scrollLeft = singleSetWidth;
-        scrollPosRef.current = singleSetWidth;
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [repeatCount]);
-
-  // 3. Smooth, continuous horizontal marquee auto-scroll loop
+  // Secondary high-frequency fallback listener for immediate layout sync
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+    const getScrollEl = () => scrollContainerRef?.current || null;
 
-    let lastTime = performance.now();
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      const scrollEl = getScrollEl();
+      const rect = containerRef.current.getBoundingClientRect();
+      const containerHeight = containerRef.current.offsetHeight;
+      const viewportHeight = window.innerHeight;
 
-    const loopStep = (time: number) => {
-      const delta = (time - lastTime) / 1000;
-      lastTime = time;
+      const topOffset = scrollEl ? 52 : 0;
+      const totalScrollable = containerHeight - (viewportHeight - topOffset);
 
-      // Only scroll when visible and not currently being dragged
-      if (
-        container &&
-        isInViewRef.current &&
-        !isHoveredRef.current &&
-        !isDraggingRef.current
-      ) {
-        // Steady cinematic marquee velocity (~42px/sec)
-        const speed = 42;
-        const pixelsToScroll = speed * Math.min(delta, 0.1);
-        scrollPosRef.current += pixelsToScroll;
+      if (totalScrollable <= 0) return;
 
-        // Wrap seamlessly around single set boundaries
-        const singleSetWidth = container.scrollWidth / repeatCount;
-        if (singleSetWidth > 0) {
-          if (scrollPosRef.current >= singleSetWidth * 2) {
-            scrollPosRef.current -= singleSetWidth;
-          } else if (scrollPosRef.current <= 0) {
-            scrollPosRef.current += singleSetWidth;
-          }
-        }
-
-        container.scrollLeft = Math.round(scrollPosRef.current);
-      }
-
-      animationFrameIdRef.current = requestAnimationFrame(loopStep);
+      const scrolledPastTop = topOffset - rect.top;
+      const progress = Math.max(0, Math.min(1, scrolledPastTop / totalScrollable));
+      smoothProgress.set(progress);
     };
 
-    animationFrameIdRef.current = requestAnimationFrame(loopStep);
+    const target = getScrollEl() || window;
+    target.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    handleScroll();
+
+    const timer = setTimeout(handleScroll, 120);
 
     return () => {
-      if (animationFrameIdRef.current) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-      }
+      target.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      clearTimeout(timer);
     };
-  }, [repeatCount]);
-
-  // Mouse drag-to-scroll interaction
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    isDraggingRef.current = true;
-    hasMovedRef.current = false;
-    startXRef.current = e.pageX - el.offsetLeft;
-    scrollLeftStartRef.current = el.scrollLeft;
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const x = e.pageX - el.offsetLeft;
-    const walk = (x - startXRef.current) * 1.25;
-    if (Math.abs(walk) > 6) {
-      hasMovedRef.current = true;
-    }
-    el.scrollLeft = scrollLeftStartRef.current - walk;
-    scrollPosRef.current = el.scrollLeft;
-
-    const singleSetWidth = el.scrollWidth / repeatCount;
-    if (singleSetWidth > 0) {
-      if (el.scrollLeft >= singleSetWidth * 2) {
-        el.scrollLeft -= singleSetWidth;
-        scrollLeftStartRef.current -= singleSetWidth;
-        scrollPosRef.current = el.scrollLeft;
-      } else if (el.scrollLeft <= 0) {
-        el.scrollLeft += singleSetWidth;
-        scrollLeftStartRef.current += singleSetWidth;
-        scrollPosRef.current = el.scrollLeft;
-      }
-    }
-  };
-
-  const handleMouseUpOrLeave = () => {
-    if (isDraggingRef.current && scrollContainerRef.current) {
-      scrollPosRef.current = scrollContainerRef.current.scrollLeft;
-    }
-    isDraggingRef.current = false;
-  };
+  }, [scrollContainerRef, smoothProgress]);
 
   // Video modal handling
   const handleOpenReel = (property: ReelProperty) => {
-    if (hasMovedRef.current) return;
     scifiAudio.playHoloBeep(920, 0.1);
     setSelectedProperty(property);
     setIsPlaying(true);
@@ -318,59 +271,65 @@ export function RealEstateReelsSection() {
   };
 
   const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
+    if (modalVideoRef.current) {
+      setCurrentTime(modalVideoRef.current.currentTime);
     }
   };
 
   const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
+    if (modalVideoRef.current) {
+      setDuration(modalVideoRef.current.duration);
     }
   };
 
-  const handleNextReel = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const newProgress = Math.max(0, Math.min(1, clickX / rect.width));
+    if (modalVideoRef.current && duration > 0) {
+      modalVideoRef.current.currentTime = newProgress * duration;
+    }
+  };
+
+  const handleNextReel = () => {
     if (!selectedProperty) return;
-    const currentIndex = REEL_PROPERTIES.findIndex((p) => p.id === selectedProperty.id);
-    const nextIndex = (currentIndex + 1) % REEL_PROPERTIES.length;
-    setSelectedProperty(REEL_PROPERTIES[nextIndex]);
+    scifiAudio.playHoloBeep(800, 0.05);
+    const currIdx = REEL_PROPERTIES.findIndex((p) => p.id === selectedProperty.id);
+    const nextIdx = (currIdx + 1) % REEL_PROPERTIES.length;
+    setSelectedProperty(REEL_PROPERTIES[nextIdx]);
+    setIsPlaying(true);
     setCurrentTime(0);
     setInquirySent(false);
   };
 
-  const handlePrevReel = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handlePrevReel = () => {
     if (!selectedProperty) return;
-    const currentIndex = REEL_PROPERTIES.findIndex((p) => p.id === selectedProperty.id);
-    const prevIndex = (currentIndex - 1 + REEL_PROPERTIES.length) % REEL_PROPERTIES.length;
-    setSelectedProperty(REEL_PROPERTIES[prevIndex]);
+    scifiAudio.playHoloBeep(800, 0.05);
+    const currIdx = REEL_PROPERTIES.findIndex((p) => p.id === selectedProperty.id);
+    const prevIdx = (currIdx - 1 + REEL_PROPERTIES.length) % REEL_PROPERTIES.length;
+    setSelectedProperty(REEL_PROPERTIES[prevIdx]);
+    setIsPlaying(true);
     setCurrentTime(0);
     setInquirySent(false);
   };
 
-  // Video sync
+  // Modal Video play/pause effect
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (!modalVideoRef.current) return;
     if (isPlaying) {
-      videoRef.current.play().catch(() => {
-        if (videoRef.current) {
-          videoRef.current.muted = true;
-          setIsMuted(true);
-          videoRef.current.play().catch(() => { });
-        }
-      });
+      modalVideoRef.current.play().catch(() => {});
     } else {
-      videoRef.current.pause();
+      modalVideoRef.current.pause();
     }
   }, [isPlaying, selectedProperty]);
 
   useEffect(() => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = isMuted;
+    if (!modalVideoRef.current) return;
+    modalVideoRef.current.muted = isMuted;
   }, [isMuted]);
 
-  // Keyboard navigation
+  // Keyboard navigation for video player
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedProperty) return;
@@ -394,77 +353,131 @@ export function RealEstateReelsSection() {
 
   return (
     <section
-      ref={sectionRef}
       id="real-estate-reels"
-      className="relative z-20 bg-[#FCF8F3] py-18 sm:py-24 text-[#012169] selection:bg-[#A10728] selection:text-[#FCF8F3] overflow-hidden border-t border-[#012169]/10"
+      className="relative z-20 bg-[#FCF8F3] text-[#012169] selection:bg-[#A10728] selection:text-[#FCF8F3]"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-8 mb-6 sm:mb-8 text-center">
-        {/* Section Title */}
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold uppercase tracking-wider text-center max-w-3xl mx-auto px-4">
-          <span className="text-[#012169]">FRANCHISE ARCHIVE</span> <span className="text-[#A10728]">&</span> <span className="text-[#012169]">COMMERCIAL REELS</span>
-        </h2>
-      </div>
+      {/* Subtle Architectural Grid Texture */}
+      <div className="absolute inset-0 pointer-events-none opacity-30 bg-[linear-gradient(to_right,rgba(1,33,105,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(1,33,105,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
-      {/* 
-        Horizontal Continuous Loop Reels Container
-        Standard 9:16 vertical aspect ratio with consistent spacing and alignment
-      */}
-      <div className="relative w-full">
-        <div
-          ref={scrollContainerRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUpOrLeave}
-          onMouseEnter={() => {
-            isHoveredRef.current = true;
-          }}
-          onMouseLeave={() => {
-            isHoveredRef.current = false;
-            isDraggingRef.current = false;
-          }}
-          onTouchStart={() => {
-            isHoveredRef.current = true;
-          }}
-          onTouchEnd={() => {
-            setTimeout(() => {
-              isHoveredRef.current = false;
-            }, 1000);
-          }}
-          className="flex gap-6 overflow-x-hidden py-4 px-6 sm:px-12 no-scrollbar select-none cursor-grab active:cursor-grabbing"
-          style={{ scrollBehavior: "auto" }}
-        >
-          {loopedProperties.map((property, idx) => {
-            const isLiked = likedReels[property.id];
-
-            return (
-              <div
-                key={`${property.id}-${idx}`}
-                onClick={() => handleOpenReel(property)}
-                className="group relative flex-shrink-0 w-[260px] sm:w-[285px] md:w-[310px] aspect-[9/16] rounded-3xl overflow-hidden border-2 border-[#012169]/15 bg-white shadow-[0_8px_30px_rgba(1,33,105,0.08)] transition-all duration-300 hover:-translate-y-2 hover:border-[#A10728] hover:shadow-[0_20px_45px_rgba(161,7,40,0.2)] cursor-pointer"
-              >
-                {/* Full-Bleed Vertical Reel Image */}
-                <img
-                  src={property.image}
-                  alt={property.title}
-                  draggable={false}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-
-                {/* Subtle vignette gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1B33]/90 via-[#0E1B33]/25 to-transparent" />
-
-                {/* Bottom Property Details */}
-                <div className="absolute bottom-4 left-4 right-4 z-10 text-[#FAF9F6]">
-                  <span className="font-mono text-xs font-bold text-[#FCF8F3] bg-[#A10728] px-2.5 py-0.5 rounded shadow-sm inline-block mb-1">
-                    {property.price}
-                  </span>
-                  <h3 className="font-serif text-sm font-bold leading-snug line-clamp-1 text-white">
-                    {property.title}
-                  </h3>
-                </div>
+      {/* ====================================================================
+          STICKY SCROLL CONTAINER (145vh Total Scroll Track)
+          Pins sticky stage to the viewport so user expands all 5 reels with a single scroll.
+          ==================================================================== */}
+      <div ref={containerRef} className="relative h-[145vh]">
+        {/* Sticky Viewport: Perfectly pinned under modal header while scrolling */}
+        <div className="sticky top-0 sm:top-[52px] h-screen sm:h-[calc(100vh-52px)] w-full flex flex-col justify-between py-3 sm:py-4 lg:py-5 px-3 sm:px-6 lg:px-8 select-none overflow-hidden">
+          {/* 1. TOP HEADER: Editorial Title */}
+          <div className="w-full max-w-[1560px] mx-auto flex items-center justify-between border-b border-[#012169]/15 pb-2.5 sm:pb-3 flex-shrink-0 z-20">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
+                <span className="font-sans text-[10px] sm:text-xs font-bold text-[#A10728] tracking-[0.2em] uppercase">
+                  EDITORIAL ARCHIVE // SCROLL TO EXPAND ALL 5 VIDEO REELS
+                </span>
               </div>
-            );
-          })}
+              <h2 className="font-['Condor_Med_Cond',sans-serif] text-2xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-[#012169] leading-none">
+                Commercial Archives <span className="text-[#A10728] font-normal italic font-serif">&amp;</span> Video Reels
+              </h2>
+            </div>
+          </div>
+
+          {/* 2. MAIN PROGRESSIVE STAGE: 5 Standard 9:16 Instagram Reel Video Cards Growing from Baseline */}
+          <div className="w-full max-w-[1560px] mx-auto flex-1 flex flex-col justify-end items-center my-auto z-20 py-1.5 sm:py-2 overflow-visible">
+            <div
+              ref={cardsRowRef}
+              className="w-full flex md:grid md:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5 xl:gap-6 items-end justify-start md:justify-center overflow-x-auto md:overflow-visible pb-2 no-scrollbar"
+            >
+              {REEL_PROPERTIES.map((property, idx) => {
+                const spec = CARD_SPECS[idx];
+                const rawT = Math.max(0, Math.min(1, (scrollProgress - spec.start) / (spec.end - spec.start)));
+
+                // Smooth cubic bezier easing
+                const easeT =
+                  rawT < 0.5 ? 4 * rawT * rawT * rawT : 1 - Math.pow(-2 * rawT + 2, 3) / 2;
+
+                const minHeight = 130;
+                const currentHeight = Math.round(minHeight + (maxCardHeight - minHeight) * easeT);
+                const opacity = 1;
+                const scale = 0.95 + 0.05 * easeT;
+
+                // When closed (easeT === 0), content and video are completely hidden (opacity 0), showing only solid red.
+                // As the reel opens with scroll, video and title smoothly fade in.
+                const isCardOpen = easeT > 0.05;
+                const videoOpacity = Math.max(0, Math.min(1, (easeT - 0.04) / 0.65));
+                const contentOpacity = Math.max(0, Math.min(1, (easeT - 0.15) / 0.75));
+
+                return (
+                  <div
+                    key={property.id}
+                    onClick={() => handleOpenReel(property)}
+                    className={`group relative flex-shrink-0 w-[260px] sm:w-[290px] md:w-full flex flex-col justify-end overflow-hidden cursor-pointer select-none rounded-2xl sm:rounded-3xl transition-all duration-300 ${
+                      isCardOpen
+                        ? "border-2 border-white/20 hover:border-white/55 shadow-[0_16px_50px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_60px_rgba(1,33,105,0.3)]"
+                        : "border-2 border-[#720808] shadow-[0_12px_40px_rgba(114,8,8,0.22)]"
+                    }`}
+                    style={{
+                      height: `${currentHeight}px`,
+                      opacity,
+                      transform: `scale(${scale})`,
+                      backgroundColor: isCardOpen ? "#0A0F1D" : (spec.color || "#720808"),
+                      transformOrigin: "bottom center",
+                    }}
+                    title={`Click to watch ${property.title}`}
+                  >
+                    {/* Layer 1: Actual Video Playing Smoothly Inside the Reel Card (Fades in without red tint) */}
+                    <video
+                      ref={(el) => {
+                        if (el) {
+                          if (isCardOpen && el.paused) {
+                            el.play().catch(() => {});
+                          } else if (!isCardOpen && !el.paused) {
+                            el.pause();
+                          }
+                        }
+                      }}
+                      src={property.videoSrc}
+                      poster={property.image}
+                      autoPlay={false}
+                      loop
+                      muted
+                      playsInline
+                      preload="auto"
+                      style={{ opacity: videoOpacity }}
+                      className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ease-out group-hover:scale-105"
+                    />
+
+                    {/* Layer 2: Neutral Dark Vignette Overlay for Text Legibility (Zero Red Tint on Open Video) */}
+                    <div
+                      className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                      style={{
+                        opacity: contentOpacity,
+                        background:
+                          "linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 35%, transparent 65%)",
+                      }}
+                    />
+
+                    {/* Layer 3: Clean Property Title & Relevant Reel Details */}
+                    <div
+                      className="relative z-20 p-3 sm:p-4 lg:p-5 text-white flex flex-col justify-end transition-opacity duration-300"
+                      style={{ opacity: contentOpacity }}
+                    >
+                      <div className="flex items-center justify-between gap-1 mb-1.5">
+                        <span className="font-mono text-[9px] sm:text-[10px] font-bold text-white/90 bg-white/15 backdrop-blur-md px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                          {spec.indexLabel}
+                        </span>
+                        <span className="font-mono text-[10px] sm:text-xs font-bold text-white/95">
+                          {property.price}
+                        </span>
+                      </div>
+                      <h3 className="font-['Condor_Med_Cond',sans-serif] text-base sm:text-lg lg:text-xl font-bold leading-tight line-clamp-2 text-white group-hover:text-[#FCF8F3] transition-colors drop-shadow-sm">
+                        {property.title}
+                      </h3>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -479,14 +492,14 @@ export function RealEstateReelsSection() {
           {/* Desktop Navigation Chevrons Outside the Vertical Phone Frame */}
           <button
             onClick={handlePrevReel}
-            className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/90 text-[#FAF9F6] backdrop-blur-md hover:border-[#A10728] hover:bg-[#A10728] transition-colors cursor-pointer shadow-xl"
+            className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/90 text-[#FAF9F6] backdrop-blur-md hover:border-white/50 hover:bg-[#012169] transition-colors cursor-pointer shadow-xl"
             title="Previous Reel"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={handleNextReel}
-            className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/90 text-[#FAF9F6] backdrop-blur-md hover:border-[#A10728] hover:bg-[#A10728] transition-colors cursor-pointer shadow-xl"
+            className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/90 text-[#FAF9F6] backdrop-blur-md hover:border-white/50 hover:bg-[#012169] transition-colors cursor-pointer shadow-xl"
             title="Next Reel"
           >
             <ChevronRight className="h-6 w-6" />
@@ -499,7 +512,7 @@ export function RealEstateReelsSection() {
           >
             {/* Native Video Element */}
             <video
-              ref={videoRef}
+              ref={modalVideoRef}
               src={selectedProperty.videoSrc}
               className="absolute inset-0 h-full w-full object-cover cursor-pointer"
               loop
@@ -515,9 +528,12 @@ export function RealEstateReelsSection() {
             {/* Top Bar: Progress Indicator & Action Controls */}
             <div className="relative z-30 p-4">
               {/* Instagram-style Top Segmented Progress Bar */}
-              <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
+              <div
+                onClick={handleSeek}
+                className="h-1 w-full overflow-hidden rounded-full bg-white/20 cursor-pointer"
+              >
                 <div
-                  className="h-full bg-[#A10728] transition-all duration-100 ease-linear shadow-[0_0_10px_#A10728]"
+                  className="h-full bg-white transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(255,255,255,0.7)]"
                   style={{
                     width: duration > 0 ? `${(currentTime / duration) * 100}%` : "0%",
                   }}
@@ -526,7 +542,7 @@ export function RealEstateReelsSection() {
 
               <div className="mt-3 flex items-center justify-between text-white">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-[#A10728] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#FAF9F6] border border-white/20 shadow-sm">
+                  <span className="rounded-full bg-[#012169]/90 backdrop-blur-md px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#FAF9F6] border border-white/25 shadow-sm">
                     {selectedProperty.categoryLabel}
                   </span>
                   <span className="font-mono text-xs text-[#FAF9F6]/80">
@@ -537,18 +553,14 @@ export function RealEstateReelsSection() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={toggleMute}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0E1B33]/80 backdrop-blur-md text-[#FAF9F6] border border-white/20 hover:bg-[#A10728] transition-colors cursor-pointer"
+                    className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[#0E1B33]/80 backdrop-blur-md text-[#FAF9F6] border border-white/20 hover:bg-[#012169] transition-colors cursor-pointer"
                     title={isMuted ? "Unmute" : "Mute"}
                   >
-                    {isMuted ? (
-                      <VolumeX className="h-4 w-4" />
-                    ) : (
-                      <Volume2 className="h-4 w-4" />
-                    )}
+                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                   </button>
                   <button
                     onClick={handleCloseReel}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0E1B33]/80 backdrop-blur-md text-[#FAF9F6] border border-white/20 hover:bg-[#A10728] transition-colors cursor-pointer"
+                    className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[#0E1B33]/80 backdrop-blur-md text-[#FAF9F6] border border-white/20 hover:bg-[#012169] transition-colors cursor-pointer"
                     title="Close"
                   >
                     <X className="h-4 w-4" />
@@ -561,9 +573,9 @@ export function RealEstateReelsSection() {
             {!isPlaying && (
               <div
                 onClick={togglePlay}
-                className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer bg-black/35"
+                className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer bg-black/35 backdrop-blur-[2px]"
               >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#A10728] text-[#FAF9F6] shadow-[0_0_30px_rgba(161,7,40,0.5)] transition-transform hover:scale-110">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#012169]/90 border border-white/30 backdrop-blur-md text-[#FAF9F6] shadow-[0_0_30px_rgba(1,33,105,0.6)] transition-transform hover:scale-110">
                   <Play className="h-7 w-7 ml-1 fill-current" />
                 </div>
               </div>
@@ -577,12 +589,14 @@ export function RealEstateReelsSection() {
                 title="Like"
               >
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/85 backdrop-blur-md transition-transform group-hover/btn:scale-110 ${likedReels[selectedProperty.id] ? "text-[#A10728] border-[#A10728]" : "text-white"
-                    }`}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/85 backdrop-blur-md transition-transform group-hover/btn:scale-110 ${
+                    likedReels[selectedProperty.id] ? "text-rose-400 border-rose-400" : "text-white"
+                  }`}
                 >
                   <Heart
-                    className={`h-5 w-5 ${likedReels[selectedProperty.id] ? "fill-[#A10728] text-[#A10728]" : ""
-                      }`}
+                    className={`h-5 w-5 ${
+                      likedReels[selectedProperty.id] ? "fill-rose-400 text-rose-400" : ""
+                    }`}
                   />
                 </div>
                 <span className="font-mono text-[9px] text-[#FAF9F6]/80">Save</span>
@@ -619,11 +633,11 @@ export function RealEstateReelsSection() {
               <p className="font-mono text-xl sm:text-2xl font-bold text-[#FAF9F6]">
                 {selectedProperty.price}
               </p>
-              <h3 className="mt-1 font-serif text-base sm:text-lg font-bold text-white leading-snug line-clamp-1">
+              <h3 className="mt-1 font-['Condor_Med_Cond',sans-serif] text-base sm:text-lg font-bold text-white leading-snug line-clamp-1">
                 {selectedProperty.title}
               </h3>
               <p className="mt-1 flex items-center gap-1 text-xs font-mono text-[#FAF9F6]/85">
-                <MapPin className="h-3 w-3 text-[#A10728] shrink-0" />
+                <MapPin className="h-3 w-3 text-sky-300 shrink-0" />
                 <span className="truncate">{selectedProperty.location}</span>
               </p>
               <p className="mt-1 text-[11px] font-mono text-[#FAF9F6]/70">
@@ -636,7 +650,7 @@ export function RealEstateReelsSection() {
                   scifiAudio.playHoloBeep(980, 0.1);
                   setInquirySent(true);
                 }}
-                className="mt-3.5 flex items-center gap-2 rounded-xl bg-[#A10728] text-[#FAF9F6] hover:bg-[#720808] px-4 py-2 font-mono text-[11px] font-bold uppercase shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                className="mt-3.5 flex items-center gap-2 rounded-xl bg-[#012169] text-[#FAF9F6] hover:bg-[#002B7F] border border-white/20 px-4 py-2 font-mono text-[11px] font-bold uppercase shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <Calendar className="h-3.5 w-3.5 text-[#FAF9F6]" />
                 <span>{inquirySent ? "PROSPECTUS REQUESTED ✓" : "REQUEST PROSPECTUS"}</span>

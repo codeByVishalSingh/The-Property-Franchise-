@@ -204,51 +204,51 @@ export function RealEstateIntroVideo({
 
         {/* Top Header Bar */}
         <div
-          className={`absolute top-0 left-0 right-0 z-40 flex items-center justify-between p-6 sm:p-10 transition-opacity duration-300 bg-gradient-to-b from-[#081220]/95 via-[#081220]/60 to-transparent ${
+          className={`absolute top-0 left-0 right-0 z-40 flex items-center justify-between p-4 sm:p-6 md:p-10 transition-opacity duration-300 bg-gradient-to-b from-[#081220]/95 via-[#081220]/60 to-transparent gap-3 ${
             showControls ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
           {/* Company Brand Monogram & Title */}
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-full overflow-hidden border border-[#A10728]/40 bg-white shadow-md backdrop-blur-md">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+            <div className="relative flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full overflow-hidden border border-[#A10728]/40 bg-white shadow-md backdrop-blur-md flex-shrink-0">
               <img
                 src="/tpf_logo.jpg"
                 alt="The Property Franchise"
                 className="h-full w-full object-cover"
               />
             </div>
-            <div>
-              <p className="font-serif text-sm font-bold tracking-widest text-[#FAF9F6] flex items-center gap-2">
-                <span>{companyName}</span>
-                <span className="rounded-full bg-[#A10728] border border-[#FAF9F6]/30 px-2.5 py-0.5 text-[10px] font-mono font-normal text-white">
-                  OFFICIAL FRANCHISE INTRO
+            <div className="min-w-0">
+              <p className="font-['Condor_Med_Cond',sans-serif] text-xs sm:text-sm font-bold tracking-widest text-[#FAF9F6] flex items-center gap-1.5 sm:gap-2 truncate">
+                <span className="truncate">{companyName}</span>
+                <span className="hidden xs:inline rounded-full bg-[#A10728] border border-[#FAF9F6]/30 px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-normal text-white flex-shrink-0">
+                  INTRO
                 </span>
               </p>
-              <p className="text-[11px] font-mono tracking-wider text-[#FAF9F6]/80 uppercase mt-0.5">
+              <p className="hidden sm:block text-[11px] font-mono tracking-wider text-[#FAF9F6]/80 uppercase mt-0.5 truncate max-w-md">
                 {tagline}
               </p>
             </div>
           </div>
 
           {/* Right Action: Close Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => {
                 scifiAudio.playHoloBeep(750, 0.08);
                 onClose();
               }}
-              className="group flex items-center gap-2 rounded-lg border border-[#FAF9F6]/20 bg-[#012169]/90 px-5 py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-[#FAF9F6] backdrop-blur-md transition-all duration-200 hover:border-[#A10728] hover:bg-[#A10728] shadow-lg cursor-pointer"
-              title="Close Video (Esc)"
+              className="group flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#FAF9F6]/20 bg-[#012169]/90 px-3 sm:px-5 py-2 sm:py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-[#FAF9F6] backdrop-blur-md transition-all duration-200 hover:border-[#A10728] hover:bg-[#A10728] shadow-lg cursor-pointer"
+              title="Close Video"
             >
-              <span>Close [ESC]</span>
-              <X className="h-4 w-4 transition-transform group-hover:scale-110" />
+              <span>Close</span>
+              <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:scale-110" />
             </button>
           </div>
         </div>
 
         {/* Bottom Video Controls HUD */}
         <div
-          className={`absolute bottom-0 left-0 right-0 z-40 p-6 sm:p-10 bg-gradient-to-t from-[#081220] via-[#081220]/85 to-transparent transition-opacity duration-300 ${
+          className={`absolute bottom-0 left-0 right-0 z-40 p-4 sm:p-6 md:p-10 bg-gradient-to-t from-[#081220] via-[#081220]/85 to-transparent transition-opacity duration-300 ${
             showControls ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >

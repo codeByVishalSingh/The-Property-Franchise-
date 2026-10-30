@@ -11,7 +11,7 @@ import { FranchiseMiniGame } from "./ui/FranchiseMiniGame";
 import { ContactSection } from "./ui/ContactSection";
 import { Footer } from "./ui/Footer";
 import { scifiAudio } from "@/lib/audio";
-import { X, Sparkles } from "lucide-react";
+import { X, Sparkles, Film, Building2, Play, Mail, Undo2 } from "lucide-react";
 
 // Dynamically import SceneCanvas with SSR disabled for safe WebGL initialization
 const SceneCanvas = dynamic(
@@ -114,51 +114,45 @@ export function LandingExperience() {
           >
             {/* Modal Card with Natural Floating Entrance */}
             <motion.div
-              initial={{ opacity: 0, y: 36, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 24, scale: 0.985 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{
-                duration: 0.42,
+                duration: 0.3,
                 ease: [0.16, 1, 0.3, 1],
               }}
               className="relative min-h-screen bg-[#FCF8F3] text-[#012169] shadow-2xl flex flex-col justify-between"
             >
               {/* Sticky Top Header Bar */}
-              <motion.div
-                initial={{ opacity: 0, y: -16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="sticky top-0 z-50 flex items-center justify-between border-b border-[#012169]/10 bg-[#FCF8F3]/95 px-4 sm:px-8 py-3.5 backdrop-blur-md shadow-sm"
+              <div
+                className="sticky top-0 z-50 flex items-center justify-between border-b border-[#012169]/10 bg-[#FCF8F3]/95 px-3 sm:px-8 py-2.5 sm:py-3.5 backdrop-blur-md shadow-sm gap-2"
               >
                 {/* Active Section Identity */}
-                <div className="flex items-center">
-                  <span className="font-serif text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#012169]">
+                <div className="flex items-center min-w-0 pr-2">
+                  <span className="font-['Condor_Med_Cond',sans-serif] text-xs sm:text-base font-extrabold uppercase tracking-wider text-[#012169] truncate">
                     {activeModal === "reels" && <>Commercial Archives <span className="text-[#A10728]">&</span> Video Reels</>}
                     {activeModal === "details" && <>Commercial Services <span className="text-[#A10728]">&</span> Trophy Showcase</>}
-                    {activeModal === "contact" && <>Commercial Franchise Enquiries <span className="text-[#A10728]">&</span> Consultations</>}
+                    {activeModal === "contact" && <>Franchise Enquiries <span className="text-[#A10728]">&</span> Consultations</>}
                   </span>
                 </div>
 
-                {/* Close / Return Button */}
+                {/* Return Button with U-turn Arrow (↩) Icon */}
                 <button
                   onClick={handleCloseModal}
-                  className="flex items-center gap-2 rounded-full border border-[#012169]/20 bg-[#012169] px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#FAF9F6] shadow-md transition-all hover:bg-[#A10728] hover:border-[#A10728] hover:scale-105 active:scale-95 cursor-pointer"
-                  title="Return to 3D Bridge Command (ESC)"
+                  className="flex-shrink-0 flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-[#012169]/20 bg-[#012169] text-[#FAF9F6] shadow-md transition-all hover:bg-[#A10728] hover:border-[#A10728] hover:scale-105 active:scale-95 cursor-pointer group"
+                  title="Return to Bridge"
+                  aria-label="Return to Bridge"
                 >
-                  <span>Return to Bridge</span>
-                  <X className="h-4 w-4" />
+                  <Undo2 className="h-4 w-4 sm:h-4.5 sm:w-4.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
                 </button>
-              </motion.div>
+              </div>
 
               {/* Dynamic Content Views */}
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-                className="flex-1"
-              >
+              <div className="flex-1">
                 {/* 1. Reels View (Sue Storm) */}
-                {activeModal === "reels" && <RealEstateReelsSection />}
+                {activeModal === "reels" && (
+                  <RealEstateReelsSection scrollContainerRef={modalScrollRef} />
+                )}
 
                 {/* 2. Details & Showcase View (Johnny Storm) */}
                 {activeModal === "details" && (
@@ -170,9 +164,12 @@ export function LandingExperience() {
 
                 {/* 3. Contact View (Ben Grimm) */}
                 {activeModal === "contact" && (
-                  <ContactSection onOpenVideo={() => setIsVideoOpen(true)} />
+                  <ContactSection
+                    scrollContainerRef={modalScrollRef}
+                    onOpenVideo={() => setIsVideoOpen(true)}
+                  />
                 )}
-              </motion.div>
+              </div>
 
               {/* Corporate Footer */}
               <Footer />
@@ -188,6 +185,45 @@ export function LandingExperience() {
         companyName="THE PROPERTY FRANCHISE"
         tagline="COMMERCIAL REAL ESTATE FRANCHISE NETWORK & GLOBAL TERRITORIES"
       />
+
+      {/* Mobile Quick-Action Command Dock (Bridge Touch Controls) */}
+      {activeModal === "none" && !isVideoOpen && (
+        <div className="md:hidden fixed bottom-6 left-0 right-0 z-40 px-4 flex justify-center pointer-events-none animate-in fade-in duration-300">
+          <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-full border border-[#012169]/20 bg-[#FCF8F3]/95 backdrop-blur-lg shadow-[0_10px_30px_rgba(1,33,105,0.15)]">
+            <button
+              onClick={handleReelsClick}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full font-['Condor_Med_Cond',sans-serif] text-xs font-bold uppercase tracking-wider text-[#012169] hover:bg-[#012169] hover:text-[#FAF9F6] active:bg-[#A10728] active:text-[#FAF9F6] transition-all cursor-pointer"
+            >
+              <Film className="h-3.5 w-3.5 text-[#A10728]" />
+              <span>Reels</span>
+            </button>
+
+            <button
+              onClick={handlePlanetsClick}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full font-['Condor_Med_Cond',sans-serif] text-xs font-bold uppercase tracking-wider text-[#012169] hover:bg-[#012169] hover:text-[#FAF9F6] active:bg-[#A10728] active:text-[#FAF9F6] transition-all cursor-pointer"
+            >
+              <Building2 className="h-3.5 w-3.5 text-[#012169]" />
+              <span>Details</span>
+            </button>
+
+            <button
+              onClick={handleMainCharacterClick}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full font-['Condor_Med_Cond',sans-serif] text-xs font-bold uppercase tracking-wider bg-[#A10728] text-white shadow-md active:scale-95 transition-all cursor-pointer"
+            >
+              <Play className="h-3.5 w-3.5 fill-current text-white" />
+              <span>Intro</span>
+            </button>
+
+            <button
+              onClick={handleThirdCharacterClick}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full font-['Condor_Med_Cond',sans-serif] text-xs font-bold uppercase tracking-wider text-[#012169] hover:bg-[#012169] hover:text-[#FAF9F6] active:bg-[#A10728] active:text-[#FAF9F6] transition-all cursor-pointer"
+            >
+              <Mail className="h-3.5 w-3.5 text-[#012169]" />
+              <span>Contact</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
