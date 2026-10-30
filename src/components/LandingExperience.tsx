@@ -7,7 +7,6 @@ import { Navigation } from "./ui/Navigation";
 import { RealEstateIntroVideo } from "./ui/RealEstateIntroVideo";
 import { RealEstateReelsSection } from "./ui/RealEstateReelsSection";
 import { WebsiteDetailsSection } from "./ui/WebsiteDetailsSection";
-import { FranchiseMiniGame } from "./ui/FranchiseMiniGame";
 import { ContactSection } from "./ui/ContactSection";
 import { Footer } from "./ui/Footer";
 import { scifiAudio } from "@/lib/audio";
@@ -108,7 +107,7 @@ export function LandingExperience() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden bg-[#012169]/50 backdrop-blur-md selection:bg-[#A10728] selection:text-[#FAF9F6]"
+            className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden scroll-smooth bg-[#012169]/50 backdrop-blur-md selection:bg-[#A10728] selection:text-[#FAF9F6]"
             role="dialog"
             aria-modal="true"
           >
@@ -156,10 +155,7 @@ export function LandingExperience() {
 
                 {/* 2. Details & Showcase View (Johnny Storm) */}
                 {activeModal === "details" && (
-                  <>
-                    <WebsiteDetailsSection scrollContainerRef={modalScrollRef} />
-                    <FranchiseMiniGame />
-                  </>
+                  <WebsiteDetailsSection scrollContainerRef={modalScrollRef} />
                 )}
 
                 {/* 3. Contact View (Ben Grimm) */}

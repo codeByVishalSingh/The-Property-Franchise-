@@ -243,7 +243,7 @@ function StackedCard({
         zIndex: (index + 1) * 10,
       }}
       className={`sticky top-[52px] sm:top-[56px] w-full ${
-        isLast ? "mb-0" : "mb-[28vh] sm:mb-[36vh]"
+        isLast ? "mb-0" : "mb-[30vh] sm:mb-[45vh]"
       }`}
     >
       <motion.div
@@ -252,52 +252,17 @@ function StackedCard({
           opacity,
           transformOrigin: "top center",
         }}
-        className="w-full min-h-[calc(100vh-56px)] flex flex-col justify-between bg-[#FCF8F3] border-t-2 border-[#012169]/15 shadow-[0_-25px_60px_rgba(1,33,105,0.22)] rounded-t-2xl sm:rounded-t-[32px] overflow-hidden"
+        className="w-full min-h-[calc(100vh-56px)] lg:h-[calc(100vh-56px)] lg:max-h-[calc(100vh-56px)] flex flex-col justify-center bg-[#FCF8F3] border-t-2 border-[#012169]/15 shadow-[0_-25px_60px_rgba(1,33,105,0.22)] rounded-t-2xl sm:rounded-t-[32px] overflow-hidden"
       >
         {/* ================================================================
-            1. TOP METRICS BAR & CTA BUTTON (kigo.studio style layout)
+            MAIN 2-COLUMN ALONGSIDE STAGE: DETAILS ON LEFT, FULL IMAGE ON RIGHT
             ================================================================ */}
-        <div className="w-full px-4 sm:px-8 lg:px-12 pt-3.5 sm:pt-5 pb-3 border-b border-[#012169]/10 flex flex-wrap items-center justify-between gap-4 select-none bg-[#FCF8F3]/95 backdrop-blur-sm z-20 flex-shrink-0">
-          {/* Left: Metric Callouts with bold numbers */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-8 lg:gap-10">
-            {dossier.statPills.map((pill, pIdx) => (
-              <div key={pIdx} className="flex items-baseline gap-2">
-                <span className="font-['Condor_Med_Cond',sans-serif] text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#A10728] leading-none">
-                  {pill.stat}
-                </span>
-                <div>
-                  <span className="font-sans text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#012169] block leading-tight">
-                    {pill.label}
-                  </span>
-                  <span className="font-sans text-[9px] sm:text-[10px] text-[#012169]/60 hidden md:block leading-tight">
-                    {pill.note}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Right: Primary Action CTA Button */}
-          <div className="flex-shrink-0">
-            <LuxuryButton
-              onClick={() => onOpenDossier(dossier)}
-              variant="primary"
-              className="shadow-sm hover:shadow-md"
-            >
-              {dossier.ctaLabel}
-            </LuxuryButton>
-          </div>
-        </div>
-
-        {/* ================================================================
-            2. MAIN 2-COLUMN ALONGSIDE STAGE: DETAILS ON LEFT, FULL IMAGE ON RIGHT
-            ================================================================ */}
-        <div className="w-full flex-1 flex items-center px-4 sm:px-8 lg:px-12 py-3 sm:py-5 z-10">
+        <div className="w-full flex-1 flex items-center px-4 sm:px-8 lg:px-12 py-4 sm:py-6 lg:py-8 z-10">
           <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12 items-center">
             {/* ------------------------------------------------------------
-                LEFT COLUMN: Company Details, Giant Headline, Quote & Specs
+                LEFT COLUMN: Company Details, Headline, Quote & Specs
                 ------------------------------------------------------------ */}
-            <div className="lg:col-span-5 flex flex-col justify-center select-none">
+            <div className="lg:col-span-5 flex flex-col justify-center select-none py-1 sm:py-2">
               <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
                 <span className="font-sans text-[10px] sm:text-xs font-bold text-[#A10728] tracking-[0.2em] uppercase">
@@ -305,7 +270,7 @@ function StackedCard({
                 </span>
               </div>
 
-              <h3 className="font-['Condor_Med_Cond',sans-serif] text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-black uppercase tracking-tight text-[#012169] leading-[0.95] mb-2 sm:mb-3">
+              <h3 className="font-['Condor_Med_Cond',sans-serif] text-2xl sm:text-4xl lg:text-4xl xl:text-5xl font-black uppercase tracking-tight text-[#012169] leading-[0.95] mb-2 sm:mb-3">
                 {dossier.displayWord}
               </h3>
 
@@ -314,7 +279,7 @@ function StackedCard({
               </p>
 
               {/* Specifications Matrix Grid (2x2) */}
-              <div className="grid grid-cols-2 gap-2 mb-3 sm:mb-4">
+              <div className="grid grid-cols-2 gap-2 mb-4 sm:mb-5">
                 {dossier.specs.map((spec, sIdx) => (
                   <div
                     key={sIdx}
@@ -330,57 +295,32 @@ function StackedCard({
                 ))}
               </div>
 
-              {/* Feature Tags */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {dossier.features.slice(0, 3).map((feat, fIdx) => (
-                  <span
-                    key={fIdx}
-                    className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-[#012169]/15 bg-[#012169]/5 text-[#012169]"
-                  >
-                    {feat}
-                  </span>
-                ))}
+              {/* Action CTA Button */}
+              <div>
+                <LuxuryButton
+                  onClick={() => onOpenDossier(dossier)}
+                  variant="primary"
+                  className="shadow-sm hover:shadow-md"
+                >
+                  {dossier.ctaLabel}
+                </LuxuryButton>
               </div>
             </div>
 
             {/* ------------------------------------------------------------
                 RIGHT COLUMN: 100% Fully Visible Image with object-contain
                 ------------------------------------------------------------ */}
-            <div className="lg:col-span-7 flex items-center justify-center select-none">
-              <div className="relative w-full h-[260px] sm:h-[360px] md:h-[420px] lg:h-[480px] xl:h-[520px] rounded-2xl overflow-hidden bg-[#0A1224] border-2 border-[#012169]/20 shadow-[0_20px_50px_rgba(1,33,105,0.25)] flex items-center justify-center p-2 sm:p-3 group">
+            <div className="lg:col-span-7 flex items-center justify-center select-none py-1 sm:py-2">
+              <div className="relative w-full aspect-video max-h-[calc(100vh-140px)] rounded-2xl overflow-hidden bg-[#0A1224] border-2 border-[#012169]/20 shadow-[0_20px_50px_rgba(1,33,105,0.25)] flex items-center justify-center p-2 sm:p-3 group">
                 {/* 100% Fully Visible Image - Zero Cropping, Zero Cutting */}
                 <img
                   src={dossier.image}
                   alt={dossier.title}
                   className="w-full h-full object-contain rounded-xl transition-transform duration-500 ease-out group-hover:scale-[1.02]"
                 />
-
-                {/* Subtle Vignette Gradient for Depth */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A1224]/80 via-transparent to-[#0A1224]/20 pointer-events-none rounded-xl" />
-
-                {/* Floating Image Metadata Strip */}
-                <div className="absolute bottom-3 sm:bottom-4 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between text-white pointer-events-none z-10">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-[#012169]/90 backdrop-blur-md px-2.5 py-1 rounded border border-white/20">
-                      {dossier.assetType}
-                    </span>
-                    <span className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-sm">
-                      {dossier.location}
-                    </span>
-                  </div>
-                  <span className="font-mono text-[9px] sm:text-[10px] font-bold tracking-widest uppercase text-white/80 hidden sm:inline">
-                    MANDATE 0{index + 1} &bull; FULL VISUAL SPECS
-                  </span>
-                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Bottom subtle status accent */}
-        <div className="w-full border-t border-[#012169]/10 py-1.5 px-4 sm:px-8 lg:px-12 flex items-center justify-between text-[#012169]/60 font-mono text-[9px] sm:text-[10px] bg-[#FCF8F3] select-none">
-          <span>THE PROPERTY FRANCHISE &bull; ASSET SPECIFICATION CHAPTER 0{index + 1}</span>
-          <span>SCROLL DOWN TO REVEAL NEXT STACKED MANDATE &darr;</span>
         </div>
       </motion.div>
     </div>
@@ -436,7 +376,7 @@ export function WebsiteDetailsSection({ scrollContainerRef }: WebsiteDetailsSect
       {/* ====================================================================
           EDGE-TO-EDGE STACKED CARDS CONTAINER (Layered Overlapping Effect)
           ==================================================================== */}
-      <div className="relative w-full pb-16 sm:pb-24">
+      <div className="relative w-full pb-0">
         {DOSSIERS.map((dossier, idx) => (
           <StackedCard
             key={dossier.id}

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useScroll, useSpring } from "framer-motion";
 import {
   Play,
   X,
@@ -120,13 +119,13 @@ export const REEL_PROPERTIES: ReelProperty[] = [
   },
 ];
 
-// Unified scroll window for simultaneous single-scroll reveal of all 5 video reels
+// Staggered sequential scroll windows for one-by-one progressive reveal of all 5 video reels
 const CARD_SPECS = [
-  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "01 // RETAIL" },
-  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "02 // SUITES" },
-  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "03 // TOWERS" },
-  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "04 // CAMPUS" },
-  { start: 0.0, end: 0.6, color: "#720808", indexLabel: "05 // LOGISTICS" },
+  { start: 0.0, end: 0.18, color: "#720808", indexLabel: "01 // RETAIL" },
+  { start: 0.16, end: 0.36, color: "#720808", indexLabel: "02 // SUITES" },
+  { start: 0.34, end: 0.54, color: "#720808", indexLabel: "03 // TOWERS" },
+  { start: 0.52, end: 0.72, color: "#720808", indexLabel: "04 // CAMPUS" },
+  { start: 0.7, end: 0.9, color: "#720808", indexLabel: "05 // LOGISTICS" },
 ];
 
 export interface RealEstateReelsSectionProps {
@@ -181,33 +180,15 @@ export function RealEstateReelsSection({ scrollContainerRef }: RealEstateReelsSe
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Framer Motion useScroll connected directly to modal or window container
-  const { scrollYProgress } = useScroll({
-    container: scrollContainerRef,
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
+  // High-performance RAF lerp-interpolated smooth momentum scroll
+  const targetProgressRef = useRef(0);
+  const currentProgressRef = useRef(0);
+  const animFrameRef = useRef<number | null>(null);
 
-  // Cinematic inertia spring for smooth, seamless scroll transitions
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 95,
-    damping: 22,
-    mass: 0.15,
-    restDelta: 0.0005,
-  });
-
-  useEffect(() => {
-    const unsubscribe = smoothProgress.on("change", (latest) => {
-      setScrollProgress(latest);
-    });
-    return () => unsubscribe();
-  }, [smoothProgress]);
-
-  // Secondary high-frequency fallback listener for immediate layout sync
   useEffect(() => {
     const getScrollEl = () => scrollContainerRef?.current || null;
 
-    const handleScroll = () => {
+    const updateScrollProgress = () => {
       if (!containerRef.current) return;
       const scrollEl = getScrollEl();
       const rect = containerRef.current.getBoundingClientRect();
@@ -221,22 +202,51 @@ export function RealEstateReelsSection({ scrollContainerRef }: RealEstateReelsSe
 
       const scrolledPastTop = topOffset - rect.top;
       const progress = Math.max(0, Math.min(1, scrolledPastTop / totalScrollable));
-      smoothProgress.set(progress);
+      targetProgressRef.current = progress;
+
+      // Start rAF momentum loop if not active
+      if (animFrameRef.current === null) {
+        animFrameRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    const tick = () => {
+      const target = targetProgressRef.current;
+      const current = currentProgressRef.current;
+      const diff = target - current;
+
+      if (Math.abs(diff) < 0.0004) {
+        currentProgressRef.current = target;
+        setScrollProgress(target);
+        animFrameRef.current = null;
+        return;
+      }
+
+      // 0.12 lerp factor delivers butter-smooth momentum easing without lag or jitter
+      const next = current + diff * 0.12;
+      currentProgressRef.current = next;
+      setScrollProgress(next);
+
+      animFrameRef.current = requestAnimationFrame(tick);
     };
 
     const target = getScrollEl() || window;
-    target.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-    handleScroll();
+    target.addEventListener("scroll", updateScrollProgress, { passive: true });
+    window.addEventListener("resize", updateScrollProgress);
+    updateScrollProgress();
 
-    const timer = setTimeout(handleScroll, 120);
+    const timer = setTimeout(updateScrollProgress, 100);
 
     return () => {
-      target.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      target.removeEventListener("scroll", updateScrollProgress);
+      window.removeEventListener("resize", updateScrollProgress);
       clearTimeout(timer);
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
     };
-  }, [scrollContainerRef, smoothProgress]);
+  }, [scrollContainerRef]);
 
   // Video modal handling
   const handleOpenReel = (property: ReelProperty) => {
@@ -360,10 +370,10 @@ export function RealEstateReelsSection({ scrollContainerRef }: RealEstateReelsSe
       <div className="absolute inset-0 pointer-events-none opacity-30 bg-[linear-gradient(to_right,rgba(1,33,105,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(1,33,105,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
       {/* ====================================================================
-          STICKY SCROLL CONTAINER (145vh Total Scroll Track)
-          Pins sticky stage to the viewport so user expands all 5 reels with a single scroll.
+          STICKY SCROLL CONTAINER (280vh Total Scroll Track)
+          Pins sticky stage to the viewport so user expands each of the 5 reels one by one with scroll.
           ==================================================================== */}
-      <div ref={containerRef} className="relative h-[145vh]">
+      <div ref={containerRef} className="relative h-[280vh]">
         {/* Sticky Viewport: Perfectly pinned under modal header while scrolling */}
         <div className="sticky top-0 sm:top-[52px] h-screen sm:h-[calc(100vh-52px)] w-full flex flex-col justify-between py-3 sm:py-4 lg:py-5 px-3 sm:px-6 lg:px-8 select-none overflow-hidden">
           {/* 1. TOP HEADER: Editorial Title */}
@@ -372,7 +382,7 @@ export function RealEstateReelsSection({ scrollContainerRef }: RealEstateReelsSe
               <div className="flex items-center gap-2 mb-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
                 <span className="font-sans text-[10px] sm:text-xs font-bold text-[#A10728] tracking-[0.2em] uppercase">
-                  EDITORIAL ARCHIVE // SCROLL TO EXPAND ALL 5 VIDEO REELS
+                  EDITORIAL ARCHIVE // SCROLL TO REVEAL REELS ONE BY ONE
                 </span>
               </div>
               <h2 className="font-['Condor_Med_Cond',sans-serif] text-2xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-[#012169] leading-none">
@@ -410,7 +420,7 @@ export function RealEstateReelsSection({ scrollContainerRef }: RealEstateReelsSe
                   <div
                     key={property.id}
                     onClick={() => handleOpenReel(property)}
-                    className={`group relative flex-shrink-0 w-[260px] sm:w-[290px] md:w-full flex flex-col justify-end overflow-hidden cursor-pointer select-none rounded-2xl sm:rounded-3xl transition-all duration-300 ${
+                    className={`group relative flex-shrink-0 w-[260px] sm:w-[290px] md:w-full flex flex-col justify-end overflow-hidden cursor-pointer select-none rounded-2xl sm:rounded-3xl transition-[border-color,box-shadow,background-color] duration-300 will-change-[height,transform] ${
                       isCardOpen
                         ? "border-2 border-white/20 hover:border-white/55 shadow-[0_16px_50px_rgba(0,0,0,0.35)] hover:shadow-[0_20px_60px_rgba(1,33,105,0.3)]"
                         : "border-2 border-[#720808] shadow-[0_12px_40px_rgba(114,8,8,0.22)]"
