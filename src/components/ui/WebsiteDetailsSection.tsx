@@ -242,9 +242,7 @@ function StackedCard({
       style={{
         zIndex: (index + 1) * 10,
       }}
-      className={`sticky top-[52px] sm:top-[56px] w-full ${
-        isLast ? "mb-0" : "mb-[30vh] sm:mb-[45vh]"
-      }`}
+      className="sticky top-[52px] sm:top-[56px] w-full h-[calc(100vh-52px)] sm:h-[calc(100vh-56px)]"
     >
       <motion.div
         style={{
@@ -252,7 +250,7 @@ function StackedCard({
           opacity,
           transformOrigin: "top center",
         }}
-        className="w-full min-h-[calc(100vh-56px)] lg:h-[calc(100vh-56px)] lg:max-h-[calc(100vh-56px)] flex flex-col justify-center bg-[#FCF8F3] border-t-2 border-[#012169]/15 shadow-[0_-25px_60px_rgba(1,33,105,0.22)] rounded-t-2xl sm:rounded-t-[32px] overflow-hidden"
+        className="w-full h-full flex flex-col justify-center bg-[#FCF8F3] border-t-2 border-[#012169]/15 shadow-[0_-25px_60px_rgba(1,33,105,0.22)] rounded-t-2xl sm:rounded-t-[32px] overflow-hidden"
       >
         {/* ================================================================
             MAIN 2-COLUMN ALONGSIDE STAGE: DETAILS ON LEFT, FULL IMAGE ON RIGHT
