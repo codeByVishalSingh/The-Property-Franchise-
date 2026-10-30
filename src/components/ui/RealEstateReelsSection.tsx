@@ -396,12 +396,12 @@ export function RealEstateReelsSection() {
     <section
       ref={sectionRef}
       id="real-estate-reels"
-      className="relative z-20 bg-[#2285A8] py-18 sm:py-22 text-white selection:bg-[#38BDF8] selection:text-[#082230] overflow-hidden border-t border-[#38BDF8]/30"
+      className="relative z-20 bg-[#FCF8F3] py-18 sm:py-24 text-[#012169] selection:bg-[#A10728] selection:text-[#FCF8F3] overflow-hidden border-t border-[#012169]/10"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-8 mb-6 sm:mb-8 text-center">
         {/* Section Title */}
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold uppercase tracking-wider text-white text-center max-w-3xl mx-auto px-4">
-          FRANCHISE ARCHIVE & <span className="text-[#38BDF8]">COMMERCIAL REELS</span>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold uppercase tracking-wider text-center max-w-3xl mx-auto px-4">
+          <span className="text-[#012169]">FRANCHISE ARCHIVE</span> <span className="text-[#A10728]">&</span> <span className="text-[#012169]">COMMERCIAL REELS</span>
         </h2>
       </div>
 
@@ -440,15 +440,28 @@ export function RealEstateReelsSection() {
               <div
                 key={`${property.id}-${idx}`}
                 onClick={() => handleOpenReel(property)}
-                className="group relative flex-shrink-0 w-[260px] sm:w-[285px] md:w-[310px] aspect-[9/16] rounded-3xl overflow-hidden border-2 border-[#38BDF8]/40 bg-[#0B254A] shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-white hover:shadow-[0_16px_40px_rgba(56,189,248,0.35)] cursor-pointer"
+                className="group relative flex-shrink-0 w-[260px] sm:w-[285px] md:w-[310px] aspect-[9/16] rounded-3xl overflow-hidden border-2 border-[#012169]/15 bg-white shadow-[0_8px_30px_rgba(1,33,105,0.08)] transition-all duration-300 hover:-translate-y-2 hover:border-[#A10728] hover:shadow-[0_20px_45px_rgba(161,7,40,0.2)] cursor-pointer"
               >
                 {/* Full-Bleed Vertical Reel Image */}
                 <img
                   src={property.image}
                   alt={property.title}
                   draggable={false}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-106"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
+
+                {/* Subtle vignette gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1B33]/90 via-[#0E1B33]/25 to-transparent" />
+
+                {/* Bottom Property Details */}
+                <div className="absolute bottom-4 left-4 right-4 z-10 text-[#FAF9F6]">
+                  <span className="font-mono text-xs font-bold text-[#FCF8F3] bg-[#A10728] px-2.5 py-0.5 rounded shadow-sm inline-block mb-1">
+                    {property.price}
+                  </span>
+                  <h3 className="font-serif text-sm font-bold leading-snug line-clamp-1 text-white">
+                    {property.title}
+                  </h3>
+                </div>
               </div>
             );
           })}
@@ -459,21 +472,21 @@ export function RealEstateReelsSection() {
           AUTHENTIC VERTICAL 9:16 INSTAGRAM REELS VIDEO MODAL
          ======================================================== */}
       {selectedProperty && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#071927]/90 backdrop-blur-xl p-3 sm:p-6 select-none animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0E1B33]/85 backdrop-blur-xl p-3 sm:p-6 select-none animate-in fade-in duration-200">
           {/* Backdrop click to close */}
           <div className="absolute inset-0" onClick={handleCloseReel} />
 
           {/* Desktop Navigation Chevrons Outside the Vertical Phone Frame */}
           <button
             onClick={handlePrevReel}
-            className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-[#38BDF8]/40 bg-[#0B254A]/90 text-white backdrop-blur-md hover:border-[#38BDF8] hover:bg-[#0D7CD6] transition-colors cursor-pointer shadow-xl"
+            className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/90 text-[#FAF9F6] backdrop-blur-md hover:border-[#A10728] hover:bg-[#A10728] transition-colors cursor-pointer shadow-xl"
             title="Previous Reel"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={handleNextReel}
-            className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-[#38BDF8]/40 bg-[#0B254A]/90 text-white backdrop-blur-md hover:border-[#38BDF8] hover:bg-[#0D7CD6] transition-colors cursor-pointer shadow-xl"
+            className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/90 text-[#FAF9F6] backdrop-blur-md hover:border-[#A10728] hover:bg-[#A10728] transition-colors cursor-pointer shadow-xl"
             title="Next Reel"
           >
             <ChevronRight className="h-6 w-6" />
@@ -481,7 +494,7 @@ export function RealEstateReelsSection() {
 
           {/* Modal Container: Strict 9:16 Aspect Ratio Frame */}
           <div
-            className="relative z-20 flex flex-col justify-between overflow-hidden rounded-3xl border border-[#38BDF8]/50 bg-[#0B254A] shadow-[0_24px_70px_rgba(7,25,39,0.8)] w-full max-w-[380px] sm:max-w-[400px] h-[82vh] max-h-[760px] aspect-[9/16]"
+            className="relative z-20 flex flex-col justify-between overflow-hidden rounded-3xl border-2 border-white/20 bg-[#0E1B33] shadow-[0_24px_70px_rgba(14,27,51,0.8)] w-full max-w-[380px] sm:max-w-[400px] h-[82vh] max-h-[760px] aspect-[9/16]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Native Video Element */}
@@ -497,14 +510,14 @@ export function RealEstateReelsSection() {
             />
 
             {/* Subtle Gradient Overlays for Readability */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0B254A] via-transparent to-[#0B254A]/70" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0E1B33] via-transparent to-[#0E1B33]/70" />
 
             {/* Top Bar: Progress Indicator & Action Controls */}
             <div className="relative z-30 p-4">
               {/* Instagram-style Top Segmented Progress Bar */}
               <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
                 <div
-                  className="h-full bg-[#38BDF8] transition-all duration-100 ease-linear shadow-[0_0_10px_#38BDF8]"
+                  className="h-full bg-[#A10728] transition-all duration-100 ease-linear shadow-[0_0_10px_#A10728]"
                   style={{
                     width: duration > 0 ? `${(currentTime / duration) * 100}%` : "0%",
                   }}
@@ -513,10 +526,10 @@ export function RealEstateReelsSection() {
 
               <div className="mt-3 flex items-center justify-between text-white">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-[#0E72C4]/90 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white border border-[#38BDF8]/40 shadow-sm">
+                  <span className="rounded-full bg-[#A10728] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#FAF9F6] border border-white/20 shadow-sm">
                     {selectedProperty.categoryLabel}
                   </span>
-                  <span className="font-mono text-xs text-[#E0F2FE]">
+                  <span className="font-mono text-xs text-[#FAF9F6]/80">
                     {selectedProperty.duration}
                   </span>
                 </div>
@@ -524,7 +537,7 @@ export function RealEstateReelsSection() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={toggleMute}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0B254A]/80 backdrop-blur-md text-white border border-[#38BDF8]/40 hover:bg-[#0E72C4] transition-colors cursor-pointer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0E1B33]/80 backdrop-blur-md text-[#FAF9F6] border border-white/20 hover:bg-[#A10728] transition-colors cursor-pointer"
                     title={isMuted ? "Unmute" : "Mute"}
                   >
                     {isMuted ? (
@@ -535,7 +548,7 @@ export function RealEstateReelsSection() {
                   </button>
                   <button
                     onClick={handleCloseReel}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0B254A]/80 backdrop-blur-md text-white border border-[#38BDF8]/40 hover:bg-[#0E72C4] transition-colors cursor-pointer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0E1B33]/80 backdrop-blur-md text-[#FAF9F6] border border-white/20 hover:bg-[#A10728] transition-colors cursor-pointer"
                     title="Close"
                   >
                     <X className="h-4 w-4" />
@@ -550,7 +563,7 @@ export function RealEstateReelsSection() {
                 onClick={togglePlay}
                 className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer bg-black/35"
               >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#0B254A] shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-transform hover:scale-110">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#A10728] text-[#FAF9F6] shadow-[0_0_30px_rgba(161,7,40,0.5)] transition-transform hover:scale-110">
                   <Play className="h-7 w-7 ml-1 fill-current" />
                 </div>
               </div>
@@ -564,15 +577,15 @@ export function RealEstateReelsSection() {
                 title="Like"
               >
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-full border border-[#38BDF8]/40 bg-[#0B254A]/85 backdrop-blur-md transition-transform group-hover/btn:scale-110 ${likedReels[selectedProperty.id] ? "text-[#38BDF8] border-[#38BDF8]" : "text-white"
+                  className={`flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-[#0E1B33]/85 backdrop-blur-md transition-transform group-hover/btn:scale-110 ${likedReels[selectedProperty.id] ? "text-[#A10728] border-[#A10728]" : "text-white"
                     }`}
                 >
                   <Heart
-                    className={`h-5 w-5 ${likedReels[selectedProperty.id] ? "fill-[#38BDF8]" : ""
+                    className={`h-5 w-5 ${likedReels[selectedProperty.id] ? "fill-[#A10728] text-[#A10728]" : ""
                       }`}
                   />
                 </div>
-                <span className="font-mono text-[9px] text-[#E0F2FE]">Save</span>
+                <span className="font-mono text-[9px] text-[#FAF9F6]/80">Save</span>
               </button>
 
               <button
@@ -580,10 +593,10 @@ export function RealEstateReelsSection() {
                 className="flex md:hidden flex-col items-center gap-1 group/btn cursor-pointer"
                 title="Previous Reel"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B254A]/85 backdrop-blur-md border border-[#38BDF8]/40 text-white group-hover/btn:scale-110 transition-transform">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0E1B33]/85 backdrop-blur-md border border-white/20 text-white group-hover/btn:scale-110 transition-transform">
                   <ChevronLeft className="h-5 w-5" />
                 </div>
-                <span className="font-mono text-[9px] text-[#E0F2FE]">Prev</span>
+                <span className="font-mono text-[9px] text-[#FAF9F6]/80">Prev</span>
               </button>
 
               <button
@@ -591,10 +604,10 @@ export function RealEstateReelsSection() {
                 className="flex md:hidden flex-col items-center gap-1 group/btn cursor-pointer"
                 title="Next Reel"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B254A]/85 backdrop-blur-md border border-[#38BDF8]/40 text-white group-hover/btn:scale-110 transition-transform">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0E1B33]/85 backdrop-blur-md border border-white/20 text-white group-hover/btn:scale-110 transition-transform">
                   <ChevronRight className="h-5 w-5" />
                 </div>
-                <span className="font-mono text-[9px] text-[#E0F2FE]">Next</span>
+                <span className="font-mono text-[9px] text-[#FAF9F6]/80">Next</span>
               </button>
             </div>
 
@@ -603,17 +616,17 @@ export function RealEstateReelsSection() {
               className="relative z-30 p-5 text-white max-w-[85%]"
               onClick={(e) => e.stopPropagation()}
             >
-              <p className="font-mono text-xl sm:text-2xl font-bold text-[#38BDF8]">
+              <p className="font-mono text-xl sm:text-2xl font-bold text-[#FAF9F6]">
                 {selectedProperty.price}
               </p>
               <h3 className="mt-1 font-serif text-base sm:text-lg font-bold text-white leading-snug line-clamp-1">
                 {selectedProperty.title}
               </h3>
-              <p className="mt-1 flex items-center gap-1 text-xs font-mono text-[#E0F2FE]">
-                <MapPin className="h-3 w-3 text-[#38BDF8] shrink-0" />
+              <p className="mt-1 flex items-center gap-1 text-xs font-mono text-[#FAF9F6]/85">
+                <MapPin className="h-3 w-3 text-[#A10728] shrink-0" />
                 <span className="truncate">{selectedProperty.location}</span>
               </p>
-              <p className="mt-1 text-[11px] font-mono text-[#BAE6FD]">
+              <p className="mt-1 text-[11px] font-mono text-[#FAF9F6]/70">
                 {selectedProperty.floors} Storeys • {selectedProperty.sqft}
               </p>
 
@@ -623,9 +636,9 @@ export function RealEstateReelsSection() {
                   scifiAudio.playHoloBeep(980, 0.1);
                   setInquirySent(true);
                 }}
-                className="mt-3.5 flex items-center gap-2 rounded-xl bg-white text-[#0B254A] hover:bg-[#E0F2FE] px-4 py-2 font-mono text-[11px] font-bold uppercase shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                className="mt-3.5 flex items-center gap-2 rounded-xl bg-[#A10728] text-[#FAF9F6] hover:bg-[#720808] px-4 py-2 font-mono text-[11px] font-bold uppercase shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer"
               >
-                <Calendar className="h-3.5 w-3.5 text-[#0E72C4]" />
+                <Calendar className="h-3.5 w-3.5 text-[#FAF9F6]" />
                 <span>{inquirySent ? "PROSPECTUS REQUESTED ✓" : "REQUEST PROSPECTUS"}</span>
               </button>
             </div>

@@ -35,32 +35,33 @@ export function ControlBridge({ progress }: ControlBridgeProps) {
     const easeEmerge = 1 - Math.pow(1 - emergeProgress, 3);
 
     // Reposition tactical consoles at hip level directly in front of their respective characters
-    // 1. Mr. Fantastic Command Console (Center-Front Helm)
+    // Spacious, consistent spacing: Sue (-1.26), Reed (-0.42), Johnny (+0.42), Ben (+1.26) -> 0.84 gap
+    // 1. Mr. Fantastic Command Console (Center-Left Helm)
     if (captainConsoleRef.current) {
-      captainConsoleRef.current.position.set(-0.16 * spreadFactor * easeEmerge, -0.40, 1.54);
+      captainConsoleRef.current.position.set(-0.42 * spreadFactor * easeEmerge, -0.40, 1.48);
       captainConsoleRef.current.scale.setScalar(0.92 * responsiveScale);
-      captainConsoleRef.current.rotation.y = THREE.MathUtils.lerp(0, 0.03, easeEmerge);
+      captainConsoleRef.current.rotation.y = 0;
     }
 
-    // 2. Invisible Woman Archive Console (Port Wing)
+    // 2. Invisible Woman Archive Console (Port Wing - Left)
     if (archiveConsoleRef.current) {
-      archiveConsoleRef.current.position.set(-0.96 * spreadFactor * easeEmerge, -0.40, 1.42);
-      archiveConsoleRef.current.scale.setScalar(0.82 * responsiveScale);
-      archiveConsoleRef.current.rotation.y = THREE.MathUtils.lerp(0, 0.16, easeEmerge);
+      archiveConsoleRef.current.position.set(-1.26 * spreadFactor * easeEmerge, -0.40, 1.38);
+      archiveConsoleRef.current.scale.setScalar(0.80 * responsiveScale);
+      archiveConsoleRef.current.rotation.y = THREE.MathUtils.lerp(0, 0.14, easeEmerge);
     }
 
     // 3. Human Torch Navigation Console (Center-Right)
     if (navConsoleRef.current) {
-      navConsoleRef.current.position.set(0.56 * spreadFactor * easeEmerge, -0.40, 1.42);
+      navConsoleRef.current.position.set(0.42 * spreadFactor * easeEmerge, -0.40, 1.38);
       navConsoleRef.current.scale.setScalar(0.80 * responsiveScale);
-      navConsoleRef.current.rotation.y = THREE.MathUtils.lerp(0, -0.12, easeEmerge);
+      navConsoleRef.current.rotation.y = THREE.MathUtils.lerp(0, -0.14, easeEmerge);
     }
 
-    // 4. The Thing Operations Console (Side Flank)
+    // 4. The Thing Operations Console (Starboard Wing - Right)
     if (operationsConsoleRef.current) {
-      operationsConsoleRef.current.position.set(1.44 * spreadFactor * easeEmerge, -0.40, 1.36);
-      operationsConsoleRef.current.scale.setScalar(0.76 * responsiveScale);
-      operationsConsoleRef.current.rotation.y = THREE.MathUtils.lerp(0, -0.25, easeEmerge);
+      operationsConsoleRef.current.position.set(1.26 * spreadFactor * easeEmerge, -0.40, 1.32);
+      operationsConsoleRef.current.scale.setScalar(0.78 * responsiveScale);
+      operationsConsoleRef.current.rotation.y = THREE.MathUtils.lerp(0, -0.22, easeEmerge);
     }
 
     if (holoConsoleRef.current) {

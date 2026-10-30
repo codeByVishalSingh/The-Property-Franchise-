@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, startTransition } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -35,6 +35,13 @@ interface AlienCharactersProps {
   onReelsClick?: () => void;          // Invisible Woman (Sue Storm) → Memory reels
   onPlanetsClick?: () => void;        // Human Torch (Johnny Storm) → Showcase Gallery
   onThirdCharacterClick?: () => void; // The Thing (Ben Grimm) → Contact Us
+  badgeRefs?: {
+    sue: React.RefObject<HTMLDivElement | null>;
+    reed: React.RefObject<HTMLDivElement | null>;
+    johnny: React.RefObject<HTMLDivElement | null>;
+    ben: React.RefObject<HTMLDivElement | null>;
+  };
+  onHoverChar?: (char: "sue" | "reed" | "johnny" | "ben" | null) => void;
 }
 
 export function AlienCharacters({
@@ -43,6 +50,8 @@ export function AlienCharacters({
   onReelsClick,
   onPlanetsClick,
   onThirdCharacterClick,
+  badgeRefs,
+  onHoverChar,
 }: AlienCharactersProps) {
   const [reedHovered, setReedHovered] = useState(false);
   const [sueHovered, setSueHovered] = useState(false);
@@ -54,7 +63,7 @@ export function AlienCharacters({
   const sueRef = useRef<THREE.Group>(null);
   const johnnyRef = useRef<THREE.Group>(null);
   const benRef = useRef<THREE.Group>(null);
-  const herbieRef = useRef<THREE.Group>(null);
+  const tempBadgeVec = useRef(new THREE.Vector3());
 
   // Character-specific animation refs
   const reedStretchArmRef = useRef<THREE.Group>(null);
@@ -73,9 +82,9 @@ export function AlienCharacters({
     const time = state.clock.elapsedTime;
     const aspect = state.viewport.aspect;
 
-    // Viewport-aware layout: tighter spread on narrow mobile/tablet to ensure zero clipping
-    const spreadFactor = Math.max(0.48, Math.min(1.0, aspect / 1.35));
-    const responsiveScale = Math.max(0.72, Math.min(1.0, aspect / 1.15));
+    // Viewport-aware layout: generous uncrowded spacing with zero viewport clipping
+    const spreadFactor = Math.max(0.46, Math.min(1.0, aspect / 1.35));
+    const responsiveScale = Math.max(0.70, Math.min(1.0, aspect / 1.15));
 
     // Emergence easing as camera enters the bridge (progress 0.40 to 0.68)
     const emergeProgress = Math.min(1, Math.max(0, (progress - 0.40) / 0.26));
@@ -84,16 +93,18 @@ export function AlienCharacters({
     const emergeY = (1 - easeEmerge) * -0.55;
 
     // -------------------------------------------------------------
-    // 1. INVISIBLE WOMAN (Sue Storm) — Port Wing (Left)
+    // Spacious, uncrowded spacing: Sue (-1.26), Reed (-0.42), Johnny (+0.42), Ben (+1.26)
+    // Distance between every adjacent pair = 0.84 units! Zero overlap, 100% visible
     // -------------------------------------------------------------
+
+    // 1. INVISIBLE WOMAN (Sue Storm) — Port Wing (Left)
     if (sueRef.current) {
       sueRef.current.visible = isVisible;
       const idle = Math.sin(time * 1.6 + 1.2) * 0.012;
       const hoverBoost = sueHovered ? 1.05 : 1.0;
-      // Positioned cleanly on the left side-by-side with Reed, zero overlap
-      sueRef.current.position.set(-0.96 * spreadFactor * easeEmerge, -0.24 + emergeY + idle, 1.15);
+      sueRef.current.position.set(-1.26 * spreadFactor * easeEmerge, -0.24 + emergeY + idle, 1.14);
       sueRef.current.scale.setScalar(0.80 * easeEmerge * hoverBoost * responsiveScale);
-      sueRef.current.rotation.y = THREE.MathUtils.lerp(0, 0.16, easeEmerge);
+      sueRef.current.rotation.y = THREE.MathUtils.lerp(0, 0.14, easeEmerge);
     }
     if (sueForceFieldRef.current) {
       const pulse = 0.70 + Math.sin(time * 2.4) * 0.06;
@@ -109,16 +120,16 @@ export function AlienCharacters({
     }
 
     // -------------------------------------------------------------
-    // 2. MR. FANTASTIC (Reed Richards) — Prominent Center Leader (Main Character)
+    // 2. MR. FANTASTIC (Reed Richards) — PROMINENT HERO (Center-Left)
     // -------------------------------------------------------------
     if (reedRef.current) {
       reedRef.current.visible = isVisible;
       const idle = Math.sin(time * 1.8) * 0.014;
       const hoverBoost = reedHovered ? 1.07 : 1.0;
-      // Center hero: highlighted, slightly forward and larger than the crew, balanced alignment
-      reedRef.current.position.set(-0.16 * spreadFactor * easeEmerge, -0.22 + emergeY + idle, 1.25);
-      reedRef.current.scale.setScalar(0.95 * easeEmerge * hoverBoost * responsiveScale);
-      reedRef.current.rotation.y = THREE.MathUtils.lerp(0, 0.03, easeEmerge);
+      // Leading hero: visually highlighted, commanding presence, forward depth
+      reedRef.current.position.set(-0.42 * spreadFactor * easeEmerge, -0.22 + emergeY + idle, 1.28);
+      reedRef.current.scale.setScalar(0.94 * easeEmerge * hoverBoost * responsiveScale);
+      reedRef.current.rotation.y = 0;
     }
     if (reedStretchArmRef.current) {
       const stretch = 1 + Math.sin(time * 1.5) * 0.15;
@@ -137,10 +148,10 @@ export function AlienCharacters({
       johnnyRef.current.visible = isVisible;
       const idle = Math.sin(time * 2.4 + 2.5) * 0.014;
       const hoverBoost = johnnyHovered ? 1.05 : 1.0;
-      // Positioned side-by-side with generous gap between Reed and Johnny
-      johnnyRef.current.position.set(0.56 * spreadFactor * easeEmerge, -0.24 + emergeY + idle, 1.16);
+      // Positioned with matching 0.84 gap from Reed, zero overlap
+      johnnyRef.current.position.set(0.42 * spreadFactor * easeEmerge, -0.24 + emergeY + idle, 1.14);
       johnnyRef.current.scale.setScalar(0.80 * easeEmerge * hoverBoost * responsiveScale);
-      johnnyRef.current.rotation.y = THREE.MathUtils.lerp(0, -0.12, easeEmerge);
+      johnnyRef.current.rotation.y = THREE.MathUtils.lerp(0, -0.14, easeEmerge);
     }
     if (johnnyHandFlameRef.current) {
       const handPulse = 1.0 + Math.sin(time * 8.0) * 0.20;
@@ -191,18 +202,55 @@ export function AlienCharacters({
     }
 
     // -------------------------------------------------------------
-    // 5. H.E.R.B.I.E. — Floating Companion Robot
+    // Screen Coordinate Projections for 2D HTML Tooltip Badges
+    // Precisely anchored directly above the head crest of each character
+    // with top-of-screen boundary protection to prevent clipping
     // -------------------------------------------------------------
-    if (herbieRef.current) {
-      herbieRef.current.visible = isVisible;
-      const bob = Math.sin(time * 2.2 + 0.5) * 0.035;
-      herbieRef.current.position.set(
-        1.88 * spreadFactor * easeEmerge,
-        0.52 + emergeY + bob,
-        0.80
-      );
-      herbieRef.current.rotation.y = -0.32 + Math.sin(time * 1.4) * 0.07;
-      herbieRef.current.scale.setScalar(0.50 * easeEmerge * responsiveScale);
+    if (badgeRefs) {
+      if (sueRef.current && badgeRefs.sue.current) {
+        tempBadgeVec.current.set(0, 1.96, 0);
+        tempBadgeVec.current.applyMatrix4(sueRef.current.matrixWorld);
+        tempBadgeVec.current.project(state.camera);
+        const x = (tempBadgeVec.current.x * 0.5 + 0.5) * state.size.width;
+        const y = (-tempBadgeVec.current.y * 0.5 + 0.5) * state.size.height;
+        const safeX = Math.max(70, Math.min(state.size.width - 70, x));
+        const safeY = Math.max(76, y);
+        badgeRefs.sue.current.style.left = `${safeX}px`;
+        badgeRefs.sue.current.style.top = `${safeY}px`;
+      }
+      if (reedRef.current && badgeRefs.reed.current) {
+        tempBadgeVec.current.set(0, 2.06, 0);
+        tempBadgeVec.current.applyMatrix4(reedRef.current.matrixWorld);
+        tempBadgeVec.current.project(state.camera);
+        const x = (tempBadgeVec.current.x * 0.5 + 0.5) * state.size.width;
+        const y = (-tempBadgeVec.current.y * 0.5 + 0.5) * state.size.height;
+        const safeX = Math.max(70, Math.min(state.size.width - 70, x));
+        const safeY = Math.max(76, y);
+        badgeRefs.reed.current.style.left = `${safeX}px`;
+        badgeRefs.reed.current.style.top = `${safeY}px`;
+      }
+      if (johnnyRef.current && badgeRefs.johnny.current) {
+        tempBadgeVec.current.set(0, 2.00, 0);
+        tempBadgeVec.current.applyMatrix4(johnnyRef.current.matrixWorld);
+        tempBadgeVec.current.project(state.camera);
+        const x = (tempBadgeVec.current.x * 0.5 + 0.5) * state.size.width;
+        const y = (-tempBadgeVec.current.y * 0.5 + 0.5) * state.size.height;
+        const safeX = Math.max(70, Math.min(state.size.width - 70, x));
+        const safeY = Math.max(76, y);
+        badgeRefs.johnny.current.style.left = `${safeX}px`;
+        badgeRefs.johnny.current.style.top = `${safeY}px`;
+      }
+      if (benRef.current && badgeRefs.ben.current) {
+        tempBadgeVec.current.set(0, 2.15, 0);
+        tempBadgeVec.current.applyMatrix4(benRef.current.matrixWorld);
+        tempBadgeVec.current.project(state.camera);
+        const x = (tempBadgeVec.current.x * 0.5 + 0.5) * state.size.width;
+        const y = (-tempBadgeVec.current.y * 0.5 + 0.5) * state.size.height;
+        const safeX = Math.max(70, Math.min(state.size.width - 70, x));
+        const safeY = Math.max(76, y);
+        badgeRefs.ben.current.style.left = `${safeX}px`;
+        badgeRefs.ben.current.style.top = `${safeY}px`;
+      }
     }
   });
 
@@ -215,23 +263,48 @@ export function AlienCharacters({
       <group
         ref={sueRef}
         rotation={[0, 0.22, 0]}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          setSueHovered(true);
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          setSueHovered(false);
-          document.body.style.cursor = "auto";
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (onReelsClick) onReelsClick();
-        }}
       >
-        {/* Click Hitbox */}
-        <mesh position={[0, 1.05, 0]}>
-          <boxGeometry args={[0.85, 2.2, 0.85]} />
+        {/* Dedicated Hover & Click Hitbox */}
+        <mesh
+          position={[0, 1.15, 0]}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setSueHovered(true);
+              onHoverChar?.("sue");
+            });
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerEnter={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setSueHovered(true);
+              onHoverChar?.("sue");
+            });
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setSueHovered(false);
+              onHoverChar?.(null);
+            });
+            document.body.style.cursor = "auto";
+          }}
+          onPointerLeave={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setSueHovered(false);
+              onHoverChar?.(null);
+            });
+            document.body.style.cursor = "auto";
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onReelsClick) onReelsClick();
+          }}
+        >
+          <boxGeometry args={[1.4, 2.5, 1.4]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
@@ -252,11 +325,11 @@ export function AlienCharacters({
         />
 
         {/* Shimmering Force Field Spheres */}
-        <mesh ref={sueForceFieldRef} position={[0, 1.15, 0]}>
+        <mesh ref={sueForceFieldRef} position={[0, 1.15, 0]} raycast={() => null}>
           <sphereGeometry args={[0.74, 28, 28]} />
           <meshBasicMaterial color="#38BDF8" transparent opacity={0.24} side={THREE.FrontSide} />
         </mesh>
-        <mesh ref={sueForceFieldOuterRef} position={[0, 1.15, 0]}>
+        <mesh ref={sueForceFieldOuterRef} position={[0, 1.15, 0]} raycast={() => null}>
           <sphereGeometry args={[0.88, 22, 22]} />
           <meshBasicMaterial color="#E0F2FE" transparent opacity={0.12} side={THREE.FrontSide} />
         </mesh>
@@ -400,23 +473,32 @@ export function AlienCharacters({
       <group
         ref={reedRef}
         rotation={[0, 0.04, 0]}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          setReedHovered(true);
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          setReedHovered(false);
-          document.body.style.cursor = "auto";
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (onMainCharacterClick) onMainCharacterClick();
-        }}
       >
         {/* Hitbox */}
-        <mesh position={[0, 1.10, 0]}>
-          <boxGeometry args={[0.95, 2.3, 0.95]} />
+        <mesh
+          position={[0, 1.10, 0]}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setReedHovered(true);
+              onHoverChar?.("reed");
+            });
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setReedHovered(false);
+              onHoverChar?.(null);
+            });
+            document.body.style.cursor = "auto";
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onMainCharacterClick) onMainCharacterClick();
+          }}
+        >
+          <boxGeometry args={[1.05, 2.4, 1.05]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
@@ -665,22 +747,32 @@ export function AlienCharacters({
       <group
         ref={johnnyRef}
         rotation={[0, -0.12, 0]}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          setJohnnyHovered(true);
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          setJohnnyHovered(false);
-          document.body.style.cursor = "auto";
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (onPlanetsClick) onPlanetsClick();
-        }}
       >
-        <mesh position={[0, 1.05, 0]}>
-          <boxGeometry args={[0.85, 2.4, 0.85]} />
+        {/* Hitbox */}
+        <mesh
+          position={[0, 1.10, 0]}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setJohnnyHovered(true);
+              onHoverChar?.("johnny");
+            });
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setJohnnyHovered(false);
+              onHoverChar?.(null);
+            });
+            document.body.style.cursor = "auto";
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onPlanetsClick) onPlanetsClick();
+          }}
+        >
+          <boxGeometry args={[1.0, 2.45, 1.0]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
@@ -867,23 +959,32 @@ export function AlienCharacters({
       <group
         ref={benRef}
         rotation={[0, -0.24, 0]}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          setBenHovered(true);
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          setBenHovered(false);
-          document.body.style.cursor = "auto";
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (onThirdCharacterClick) onThirdCharacterClick();
-        }}
       >
         {/* Hitbox */}
-        <mesh position={[0, 1.15, 0]}>
-          <boxGeometry args={[1.15, 2.5, 1.15]} />
+        <mesh
+          position={[0, 1.15, 0]}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setBenHovered(true);
+              onHoverChar?.("ben");
+            });
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            startTransition(() => {
+              setBenHovered(false);
+              onHoverChar?.(null);
+            });
+            document.body.style.cursor = "auto";
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onThirdCharacterClick) onThirdCharacterClick();
+          }}
+        >
+          <boxGeometry args={[1.2, 2.5, 1.2]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
@@ -1061,72 +1162,6 @@ export function AlienCharacters({
           <boxGeometry args={[0.22, 0.04, 0.04]} />
           <meshStandardMaterial color={ROCK_CRACK} roughness={1.0} metalness={0.0} />
         </mesh>
-      </group>
-
-      {/* ================================================================
-          5. H.E.R.B.I.E. — Floating Retro-Futuristic Robot Companion
-             Safely within screen bounds, next to team
-         ================================================================ */}
-      <group ref={herbieRef} position={[1.68, 0.52, 0.82]}>
-        {/* Robot Head */}
-        <mesh position={[0, 0.44, 0]} castShadow>
-          <boxGeometry args={[0.26, 0.22, 0.24]} />
-          <meshStandardMaterial color={FF_WHITE} roughness={0.25} metalness={0.6} />
-        </mesh>
-        {/* Eye Visor Glass */}
-        <mesh position={[0, 0.44, 0.122]}>
-          <boxGeometry args={[0.22, 0.14, 0.01]} />
-          <meshBasicMaterial color="#0A1628" />
-        </mesh>
-        {/* Dual Friendly Lenses */}
-        <mesh position={[-0.055, 0.44, 0.13]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.032, 0.032, 0.015, 16]} />
-          <meshStandardMaterial color={FF_CYAN} emissive={FF_CYAN} emissiveIntensity={2.5} />
-        </mesh>
-        <mesh position={[0.055, 0.44, 0.13]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.032, 0.032, 0.015, 16]} />
-          <meshStandardMaterial color={FF_CYAN} emissive={FF_CYAN} emissiveIntensity={2.5} />
-        </mesh>
-
-        {/* Cylindrical White & Blue Torso */}
-        <mesh position={[0, 0.18, 0]} castShadow>
-          <cylinderGeometry args={[0.13, 0.15, 0.32, 20]} />
-          <meshStandardMaterial color={FF_WHITE} roughness={0.25} metalness={0.6} />
-        </mesh>
-        {/* Blue Waist Ring */}
-        <mesh position={[0, 0.18, 0]}>
-          <cylinderGeometry args={[0.132, 0.132, 0.06, 20]} />
-          <meshStandardMaterial color={FF_BLUE} roughness={0.3} metalness={0.4} />
-        </mesh>
-        <mesh position={[0, 0.18, 0.135]}>
-          <circleGeometry args={[0.024, 16]} />
-          <meshBasicMaterial color={FF_WHITE} />
-        </mesh>
-
-        {/* Articulated Arms holding Serving Tray (Movie Poster Detail) */}
-        <mesh position={[-0.16, 0.22, 0.06]} rotation={[0.4, 0, -0.3]}>
-          <cylinderGeometry args={[0.015, 0.015, 0.16, 8]} />
-          <meshStandardMaterial color={FF_BUCKLE} metalness={0.8} />
-        </mesh>
-        <mesh position={[0.16, 0.22, 0.06]} rotation={[0.4, 0, 0.3]}>
-          <cylinderGeometry args={[0.015, 0.015, 0.16, 8]} />
-          <meshStandardMaterial color={FF_BUCKLE} metalness={0.8} />
-        </mesh>
-        <mesh position={[0, 0.16, 0.16]}>
-          <cylinderGeometry args={[0.11, 0.11, 0.01, 20]} />
-          <meshStandardMaterial color={FF_BUCKLE} metalness={0.9} roughness={0.1} />
-        </mesh>
-
-        {/* Ion Thruster & Cyan Hover Glow */}
-        <mesh position={[0, 0.0, 0]}>
-          <coneGeometry args={[0.09, 0.10, 16]} />
-          <meshStandardMaterial color={FF_BUCKLE} metalness={0.8} />
-        </mesh>
-        <mesh position={[0, -0.07, 0]} rotation={[Math.PI, 0, 0]}>
-          <coneGeometry args={[0.06, 0.14, 12]} />
-          <meshStandardMaterial color={FF_CYAN} emissive={FF_CYAN} emissiveIntensity={3.5} transparent opacity={0.85} />
-        </mesh>
-        <pointLight position={[0, -0.08, 0]} color={FF_CYAN} intensity={1.8} distance={1.2} />
       </group>
     </group>
   );

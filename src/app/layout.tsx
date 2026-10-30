@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ErrorSuppressor } from "@/components/common/ErrorSuppressor";
 
 export const metadata: Metadata = {
   title: "The Property Franchise | Commercial Real Estate Franchise Network",
@@ -18,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#2285A8] text-white selection:bg-[#38BDF8] selection:text-[#082230]">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#FCF8F3] text-[#012169] selection:bg-[#A10728] selection:text-[#FCF8F3]">
+        <ErrorSuppressor />
+        {children}
+      </body>
     </html>
   );
 }

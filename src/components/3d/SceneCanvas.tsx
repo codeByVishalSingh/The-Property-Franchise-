@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useRef } from "react";
+import React, { Suspense, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Spaceship } from "./Spaceship";
@@ -8,12 +8,15 @@ import { ControlBridge } from "./ControlBridge";
 import { AlienCharacters } from "./AlienCharacters";
 import { EnvironmentEffects } from "./EnvironmentEffects";
 
+export type CharacterKey = "sue" | "reed" | "johnny" | "ben";
+
 interface SceneCanvasProps {
   scrollProgress: number; // 0 to 1
   onMainCharacterClick?: () => void;
   onReelsClick?: () => void;
   onPlanetsClick?: () => void;
   onThirdCharacterClick?: () => void;
+  isDimmed?: boolean;
 }
 
 // Camera controller choreographing the flight from deep space into the control bridge
@@ -83,9 +86,27 @@ export function SceneCanvas({
   onReelsClick,
   onPlanetsClick,
   onThirdCharacterClick,
+  isDimmed = false,
 }: SceneCanvasProps) {
+  const [hoveredChar, setHoveredChar] = useState<CharacterKey | null>(null);
+  const sueBadgeRef = useRef<HTMLDivElement>(null);
+  const reedBadgeRef = useRef<HTMLDivElement>(null);
+  const johnnyBadgeRef = useRef<HTMLDivElement>(null);
+  const benBadgeRef = useRef<HTMLDivElement>(null);
+
+  const badgeRefs = useRef({
+    sue: sueBadgeRef,
+    reed: reedBadgeRef,
+    johnny: johnnyBadgeRef,
+    ben: benBadgeRef,
+  });
+
   return (
-    <div className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-[#0A1628]">
+    <div
+      className={`fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-[#0A1628] transition-all duration-700 ease-out ${
+        isDimmed ? "scale-[0.98] blur-[8px] opacity-35 brightness-75 pointer-events-none" : "scale-100 blur-0 opacity-100"
+      }`}
+    >
       <Canvas
         shadows
         dpr={[1, 1.8]}
@@ -96,12 +117,12 @@ export function SceneCanvas({
         }}
         camera={{ position: [0, 3.8, 13.5], fov: 46, near: 0.1, far: 450 }}
       >
-        {/* FF Cinematic Cerulean Space Background matching poster palette */}
-        <color attach="background" args={["#0C2B3E"]} />
-        <fog attach="fog" args={["#0C2B3E", 20, 110]} />
+        {/* Deep Flag Space Navy Background */}
+        <color attach="background" args={["#081220"]} />
+        <fog attach="fog" args={["#081220", 20, 110]} />
 
-        {/* Ambient Cosmic Lighting in Deep FF Cerulean */}
-        <ambientLight intensity={0.7} color="#16536C" />
+        {/* Ambient Lighting in Heritage Flag Navy */}
+        <ambientLight intensity={0.75} color="#162744" />
 
         {/* Key Directional Rim Light in Cool Blue-White */}
         <directionalLight
@@ -138,9 +159,94 @@ export function SceneCanvas({
             onReelsClick={onReelsClick}
             onPlanetsClick={onPlanetsClick}
             onThirdCharacterClick={onThirdCharacterClick}
+            badgeRefs={badgeRefs.current}
+            onHoverChar={setHoveredChar}
           />
         </Suspense>
       </Canvas>
+
+      {/* 2D Tooltip Badges Overlay (Outside 3D Canvas - React 19 Native, Zero Unmount Race Conditions) */}
+      <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden select-none">
+        {/* SUE STORM - REEL */}
+        <div
+          ref={sueBadgeRef}
+          className="absolute will-change-transform"
+          style={{
+            opacity: hoveredChar === "sue" ? 1 : 0,
+            transform: hoveredChar === "sue"
+              ? "translate(-50%, calc(-100% - 6px)) scale(1)"
+              : "translate(-50%, calc(-100% + 4px)) scale(0.92)",
+            transition: "opacity 220ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCF8F3] text-[#012169] border-2 border-[#A10728] shadow-[0_4px_16px_rgba(161,7,40,0.3)] whitespace-nowrap">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
+            <span className="font-mono text-xs font-black tracking-widest uppercase text-[#012169]">
+              REEL
+            </span>
+          </div>
+        </div>
+
+        {/* REED RICHARDS - INTRO */}
+        <div
+          ref={reedBadgeRef}
+          className="absolute will-change-transform"
+          style={{
+            opacity: hoveredChar === "reed" ? 1 : 0,
+            transform: hoveredChar === "reed"
+              ? "translate(-50%, calc(-100% - 6px)) scale(1)"
+              : "translate(-50%, calc(-100% + 4px)) scale(0.92)",
+            transition: "opacity 220ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCF8F3] text-[#012169] border border-[#A10728] shadow-[0_4px_16px_rgba(1,33,105,0.25)] whitespace-nowrap">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
+            <span className="font-mono text-[11px] font-bold tracking-wider uppercase text-[#012169]">
+              Intro
+            </span>
+          </div>
+        </div>
+
+        {/* JOHNNY STORM - DETAILS */}
+        <div
+          ref={johnnyBadgeRef}
+          className="absolute will-change-transform"
+          style={{
+            opacity: hoveredChar === "johnny" ? 1 : 0,
+            transform: hoveredChar === "johnny"
+              ? "translate(-50%, calc(-100% - 6px)) scale(1)"
+              : "translate(-50%, calc(-100% + 4px)) scale(0.92)",
+            transition: "opacity 220ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCF8F3] text-[#012169] border border-[#A10728] shadow-[0_4px_16px_rgba(1,33,105,0.25)] whitespace-nowrap">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
+            <span className="font-mono text-[11px] font-bold tracking-wider uppercase text-[#012169]">
+              Details
+            </span>
+          </div>
+        </div>
+
+        {/* BEN GRIMM - CONTACT */}
+        <div
+          ref={benBadgeRef}
+          className="absolute will-change-transform"
+          style={{
+            opacity: hoveredChar === "ben" ? 1 : 0,
+            transform: hoveredChar === "ben"
+              ? "translate(-50%, calc(-100% - 6px)) scale(1)"
+              : "translate(-50%, calc(-100% + 4px)) scale(0.92)",
+            transition: "opacity 220ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCF8F3] text-[#012169] border border-[#A10728] shadow-[0_4px_16px_rgba(1,33,105,0.25)] whitespace-nowrap">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#A10728] animate-pulse" />
+            <span className="font-mono text-[11px] font-bold tracking-wider uppercase text-[#012169]">
+              Contact
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

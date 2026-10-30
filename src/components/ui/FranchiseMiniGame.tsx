@@ -169,7 +169,7 @@ export function FranchiseMiniGame() {
 
   const handleScrollToPlanets = () => {
     scifiAudio.playHoloBeep(980, 0.08);
-    const elem = document.getElementById("franchise-planets");
+    const elem = document.getElementById("horizontal-gallery") || document.getElementById("franchise-planets");
     if (elem) elem.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -177,7 +177,7 @@ export function FranchiseMiniGame() {
     <section
       ref={sectionRef}
       id="franchise-game"
-      className="relative z-20 bg-[#2285A8] px-6 py-20 text-white selection:bg-[#38BDF8] selection:text-[#082230] border-t border-[#38BDF8]/30 overflow-hidden"
+      className="relative z-20 bg-[#FCF8F3] px-6 py-20 sm:py-24 text-[#012169] selection:bg-[#A10728] selection:text-[#FCF8F3] overflow-hidden"
     >
       <div className="mx-auto max-w-4xl">
         {/* Title Header with smooth reveal */}
@@ -189,53 +189,39 @@ export function FranchiseMiniGame() {
           }}
           className="flex flex-col items-center text-center mb-8 will-change-transform"
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold uppercase tracking-wider text-white text-center max-w-2xl mx-auto px-4">
-            FRANCHISE STAR ROUTE NAVIGATOR
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold uppercase tracking-wider text-center max-w-2xl mx-auto px-4">
+            <span className="text-[#012169]">COMMERCIAL PORTFOLIO</span> <span className="text-[#A10728]">&</span> <span className="text-[#012169]">TERRITORY SIMULATOR</span>
           </h2>
         </div>
 
-        {/* Game Console Frame in Fantastic Four Space Navy */}
+        {/* Game Console Frame in Clean Off-White Elevated Card */}
         <div
           style={{
             transform: isVisible ? "scale(1) translateY(0)" : "scale(0.96) translateY(24px)",
             opacity: isVisible ? 1 : 0,
             transition: "transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 150ms, opacity 0.8s ease-out 150ms",
           }}
-          className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border border-[#38BDF8]/40 bg-gradient-to-b from-[#0B254A] via-[#0E3354] to-[#082238] p-6 shadow-2xl backdrop-blur-xl text-white will-change-transform"
+          className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border-2 border-[#012169]/15 bg-[#FCF8F3] p-7 sm:p-9 shadow-[0_16px_50px_rgba(1,33,105,0.08)] text-[#012169] will-change-transform"
         >
-          {/* Top Telemetry Bar */}
-          <div className="flex items-center justify-between border-b border-[#38BDF8]/25 pb-4 font-mono text-xs">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#38BDF8] animate-pulse" />
-              <span className="font-bold text-[#E0F2FE]">PORTFOLIO CAPITAL:</span>
-              <span className="font-black text-white bg-[#0D7CD6] px-2 py-0.5 rounded shadow-[0_0_10px_#38BDF8]">
-                ${score.toLocaleString()},000
-              </span>
-            </div>
-            <div className="text-[11px] text-[#BAE6FD]">
-              TARGET: ${targetScore.toLocaleString()},000
-            </div>
-          </div>
-
           {/* ========================================================
               SCREEN 1: START SCREEN
              ======================================================== */}
           {gameState === "start" && (
-            <div className="py-14 sm:py-16 flex flex-col items-center text-center animate-in fade-in duration-300">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[#38BDF8]/40 bg-[#0B254A] text-white shadow-xl">
-                <Rocket className="h-8 w-8 text-[#38BDF8]" />
+            <div className="py-12 sm:py-14 flex flex-col items-center text-center animate-in fade-in duration-300">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-[#012169]/15 bg-white text-[#A10728] shadow-md">
+                <Rocket className="h-8 w-8 text-[#A10728]" />
               </div>
-              <h3 className="mt-5 text-xl sm:text-2xl font-serif font-black text-white">
+              <h3 className="mt-5 text-xl sm:text-2xl font-serif font-black text-[#012169]">
                 READY FOR FRANCHISE FLIGHT?
               </h3>
-              <p className="mt-2 max-w-md text-xs sm:text-sm text-[#E0F2FE] font-sans leading-relaxed">
+              <p className="mt-2 max-w-md text-xs sm:text-sm text-[#012169]/80 font-sans leading-relaxed">
                 Use your keyboard arrow keys or touch buttons to collect commercial office towers and logistics parks. Reach $800,000 in portfolio assets to qualify.
               </p>
               <button
                 onClick={startGame}
-                className="mt-6 flex items-center gap-2 rounded-xl bg-white hover:bg-[#E0F2FE] text-[#0B254A] px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                className="mt-6 flex items-center gap-2 rounded-xl bg-[#A10728] hover:bg-[#720808] text-[#FAF9F6] px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider shadow-[0_4px_16px_rgba(161,7,40,0.3)] transition-transform hover:scale-105 cursor-pointer"
               >
-                <Play className="h-4 w-4 fill-current text-[#0D7CD6]" />
+                <Play className="h-4 w-4 fill-current text-[#FAF9F6]" />
                 <span>Launch Franchise Flight</span>
               </button>
             </div>
@@ -245,12 +231,26 @@ export function FranchiseMiniGame() {
               SCREEN 2: ACTIVE GAMEPLAY CANVAS
              ======================================================== */}
           {gameState === "playing" && (
-            <div className="relative h-[340px] sm:h-[380px] w-full overflow-hidden rounded-2xl bg-[#082033] mt-4 border border-[#38BDF8]/30 select-none">
+            <div className="relative h-[340px] sm:h-[380px] w-full overflow-hidden rounded-2xl bg-[#0E1B33] mt-2 border-2 border-[#0E1B33]/20 select-none shadow-inner">
+              {/* In-Game HUD: Score & Target */}
+              <div className="absolute top-3 left-4 right-4 flex items-center justify-between z-30 font-mono text-xs pointer-events-none">
+                <div className="flex items-center gap-2 bg-[#0E1B33]/85 backdrop-blur px-2.5 py-1 rounded-lg border border-white/10">
+                  <span className="h-2 w-2 rounded-full bg-[#A10728] animate-pulse" />
+                  <span className="font-bold text-white text-[10px] tracking-wide">CAPITAL:</span>
+                  <span className="font-black text-[#FAF9F6] bg-[#A10728] px-2 py-0.5 rounded text-[10px]">
+                    ${score.toLocaleString()},000
+                  </span>
+                </div>
+                <div className="text-[10px] font-semibold text-white/80 bg-[#0E1B33]/85 backdrop-blur px-2.5 py-1 rounded-lg border border-white/10">
+                  TARGET: ${targetScore.toLocaleString()},000
+                </div>
+              </div>
+
               {/* Star Background Grid */}
-              <div className="absolute inset-0 bg-[radial-gradient(#38BDF8_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
+              <div className="absolute inset-0 bg-[radial-gradient(#FAF9F6_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
 
               {/* 3 Corridor Lanes */}
-              <div className="absolute inset-0 grid grid-cols-3 divide-x divide-[#38BDF8]/20 pointer-events-none" />
+              <div className="absolute inset-0 grid grid-cols-3 divide-x divide-[#FAF9F6]/10 pointer-events-none" />
 
               {/* Falling Commercial Assets */}
               {items.map((item) => (
@@ -263,10 +263,10 @@ export function FranchiseMiniGame() {
                   }}
                   className="absolute z-10 flex flex-col items-center transition-all duration-75"
                 >
-                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl border border-[#38BDF8]/40 bg-[#0B254A] text-white shadow-md">
-                    <Building2 className="h-5 w-5 text-[#38BDF8]" />
+                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl border border-white/20 bg-[#14243E] text-white shadow-md">
+                    <Building2 className="h-5 w-5 text-[#A10728]" />
                   </div>
-                  <span className="mt-1 rounded bg-[#0D7CD6] px-1 py-0.2 font-mono text-[9px] font-bold text-white shadow-sm">
+                  <span className="mt-1 rounded bg-[#A10728] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#FAF9F6] shadow-sm">
                     +${item.value}K
                   </span>
                 </div>
@@ -281,27 +281,27 @@ export function FranchiseMiniGame() {
                 }}
                 className="absolute z-20 flex flex-col items-center transition-all duration-150"
               >
-                <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl border-2 border-white bg-[#0D7CD6] text-white shadow-[0_0_20px_#38BDF8]">
+                <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl border-2 border-[#FAF9F6] bg-[#A10728] text-white shadow-[0_0_20px_rgba(161,7,40,0.5)]">
                   <Rocket className="h-6 w-6 text-white -rotate-45" />
                 </div>
-                <div className="h-2 w-4 bg-[#38BDF8] rounded-full blur-[2px] animate-pulse mt-0.5" />
+                <div className="h-2 w-4 bg-[#A10728] rounded-full blur-[2px] animate-pulse mt-0.5" />
               </div>
 
               {/* On-screen Mobile / Click Navigation Controls */}
               <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between z-30 pointer-events-auto">
                 <button
                   onClick={moveLeft}
-                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#38BDF8]/30 bg-[#0B254A] text-white active:scale-95 backdrop-blur-md cursor-pointer hover:bg-[#0D7CD6] transition-colors shadow-sm"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl border-2 border-white/20 bg-[#FAF9F6] text-[#0E1B33] active:scale-95 cursor-pointer hover:bg-[#A10728] hover:text-white transition-colors shadow-sm"
                   aria-label="Move Left"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
-                <span className="font-mono text-[10px] text-[#BAE6FD] hidden sm:inline">
+                <span className="font-mono text-[10px] text-[#FAF9F6]/70 hidden sm:inline">
                   USE [ ← ] [ → ] KEYS OR BUTTONS TO STEER
                 </span>
                 <button
                   onClick={moveRight}
-                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#38BDF8]/30 bg-[#0B254A] text-white active:scale-95 backdrop-blur-md cursor-pointer hover:bg-[#0D7CD6] transition-colors shadow-sm"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl border-2 border-white/20 bg-[#FAF9F6] text-[#0E1B33] active:scale-95 cursor-pointer hover:bg-[#A10728] hover:text-white transition-colors shadow-sm"
                   aria-label="Move Right"
                 >
                   <ChevronRight className="h-6 w-6" />
@@ -315,17 +315,17 @@ export function FranchiseMiniGame() {
              ======================================================== */}
           {gameState === "won" && (
             <div className="py-10 sm:py-12 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white bg-[#0D7CD6] text-white shadow-[0_0_30px_#38BDF8]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white bg-[#A10728] text-white shadow-[0_4px_25px_rgba(161,7,40,0.35)]">
                 <Trophy className="h-8 w-8 text-[#FFD700]" />
               </div>
-              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#38BDF8]/40 bg-[#0B254A] px-3 py-1 font-mono text-[10px] font-bold text-white shadow-sm">
-                <ShieldCheck className="h-3.5 w-3.5 text-[#38BDF8]" />
+              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#012169]/15 bg-white px-4 py-1 font-mono text-[10px] font-bold text-[#012169] shadow-sm">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#A10728]" />
                 <span>FRANCHISE ACCREDITATION UNLOCKED</span>
               </div>
-              <h3 className="mt-3 text-2xl sm:text-3xl font-serif font-black text-white">
+              <h3 className="mt-3 text-2xl sm:text-3xl font-serif font-black text-[#012169]">
                 CONGRATULATIONS, CAPTAIN
               </h3>
-              <p className="mt-2 max-w-md text-xs sm:text-sm text-[#E0F2FE] font-sans leading-relaxed">
+              <p className="mt-2 max-w-md text-xs sm:text-sm text-[#012169]/80 font-sans leading-relaxed">
                 You have demonstrated the strategic acumen to navigate and scale commercial real estate assets. Your territory accreditation is verified.
               </p>
 
@@ -333,23 +333,23 @@ export function FranchiseMiniGame() {
               <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 w-full max-w-md">
                 <button
                   onClick={handleScrollToContact}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-[#E0F2FE] text-[#0B254A] py-3.5 font-mono text-xs font-bold uppercase tracking-wider shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#A10728] hover:bg-[#720808] text-[#FAF9F6] py-3.5 font-mono text-xs font-bold uppercase tracking-wider shadow-[0_4px_16px_rgba(161,7,40,0.25)] transition-all hover:scale-[1.02] cursor-pointer"
                 >
                   <span>Enquire About Joining</span>
-                  <ArrowRight className="h-4 w-4 text-[#0D7CD6]" />
+                  <ArrowRight className="h-4 w-4 text-[#FAF9F6]" />
                 </button>
                 <button
                   onClick={handleScrollToPlanets}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#0B254A] hover:bg-[#0E3354] text-white py-3.5 font-mono text-xs font-bold uppercase tracking-wider border border-[#38BDF8]/40 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#012169] hover:bg-[#002B7F] text-[#FAF9F6] py-3.5 font-mono text-xs font-bold uppercase tracking-wider border border-[#012169]/30 shadow-md transition-colors cursor-pointer"
                 >
                   <span>Explore Showcase</span>
-                  <Sparkles className="h-4 w-4 text-[#38BDF8]" />
+                  <Sparkles className="h-4 w-4 text-[#A10728]" />
                 </button>
               </div>
 
               <button
                 onClick={startGame}
-                className="mt-4 flex items-center gap-1.5 font-mono text-[11px] text-[#BAE6FD] hover:text-white transition-colors"
+                className="mt-4 flex items-center gap-1.5 font-mono text-[11px] font-medium text-[#012169]/70 hover:text-[#A10728] transition-colors cursor-pointer"
               >
                 <RotateCcw className="h-3 w-3" />
                 <span>Replay Simulator Flight</span>

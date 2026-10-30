@@ -165,7 +165,7 @@ export function RealEstateIntroVideo({
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-[#071927] text-white select-none overflow-hidden animate-in fade-in duration-300 selection:bg-[#38BDF8] selection:text-[#082230]"
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-[#081220] text-white select-none overflow-hidden animate-in fade-in duration-300 selection:bg-[#A10728] selection:text-[#FCF8F3]"
     >
       <div className="relative h-screen w-screen overflow-hidden flex items-center justify-center">
         {/* Full-bleed HTML5 Video */}
@@ -188,15 +188,15 @@ export function RealEstateIntroVideo({
         />
 
         {/* Ambient Dark Vignette overlay */}
-        <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-[#071927]/95 via-transparent to-[#071927]/80" />
+        <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-[#081220]/95 via-transparent to-[#081220]/80" />
 
         {/* Center Play Indicator */}
         {!isPlaying && (
           <div
             onClick={togglePlay}
-            className="absolute inset-0 z-30 flex items-center justify-center bg-[#071927]/50 backdrop-blur-[2px] cursor-pointer"
+            className="absolute inset-0 z-30 flex items-center justify-center bg-[#081220]/50 backdrop-blur-[2px] cursor-pointer"
           >
-            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-[#38BDF8]/40 bg-[#0E72C4] text-white shadow-2xl transition-transform hover:scale-110">
+            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-[#A10728]/40 bg-[#A10728] text-white shadow-2xl transition-transform hover:scale-110">
               <Play className="h-12 w-12 ml-2 fill-current" />
             </div>
           </div>
@@ -204,13 +204,13 @@ export function RealEstateIntroVideo({
 
         {/* Top Header Bar */}
         <div
-          className={`absolute top-0 left-0 right-0 z-40 flex items-center justify-between p-6 sm:p-10 transition-opacity duration-300 bg-gradient-to-b from-[#071927]/95 via-[#071927]/60 to-transparent ${
+          className={`absolute top-0 left-0 right-0 z-40 flex items-center justify-between p-6 sm:p-10 transition-opacity duration-300 bg-gradient-to-b from-[#081220]/95 via-[#081220]/60 to-transparent ${
             showControls ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
           {/* Company Brand Monogram & Title */}
           <div className="flex items-center gap-3">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-full overflow-hidden border border-[#38BDF8]/40 bg-white shadow-md backdrop-blur-md">
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-full overflow-hidden border border-[#A10728]/40 bg-white shadow-md backdrop-blur-md">
               <img
                 src="/tpf_logo.jpg"
                 alt="The Property Franchise"
@@ -218,13 +218,13 @@ export function RealEstateIntroVideo({
               />
             </div>
             <div>
-              <p className="font-serif text-sm font-bold tracking-widest text-white flex items-center gap-2">
+              <p className="font-serif text-sm font-bold tracking-widest text-[#FAF9F6] flex items-center gap-2">
                 <span>{companyName}</span>
-                <span className="rounded-full bg-[#0E72C4] border border-[#38BDF8]/40 px-2 py-0.5 text-[10px] font-mono font-normal text-white">
+                <span className="rounded-full bg-[#A10728] border border-[#FAF9F6]/30 px-2.5 py-0.5 text-[10px] font-mono font-normal text-white">
                   OFFICIAL FRANCHISE INTRO
                 </span>
               </p>
-              <p className="text-[11px] font-mono tracking-wider text-[#BAE6FD] uppercase mt-0.5">
+              <p className="text-[11px] font-mono tracking-wider text-[#FAF9F6]/80 uppercase mt-0.5">
                 {tagline}
               </p>
             </div>
@@ -237,7 +237,7 @@ export function RealEstateIntroVideo({
                 scifiAudio.playHoloBeep(750, 0.08);
                 onClose();
               }}
-              className="group flex items-center gap-2 rounded-lg border border-[#38BDF8]/40 bg-[#0B254A]/90 px-5 py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-white backdrop-blur-md transition-all duration-200 hover:border-[#38BDF8] hover:bg-[#0D7CD6] shadow-lg cursor-pointer"
+              className="group flex items-center gap-2 rounded-lg border border-[#FAF9F6]/20 bg-[#012169]/90 px-5 py-2.5 text-xs font-mono font-bold tracking-wider uppercase text-[#FAF9F6] backdrop-blur-md transition-all duration-200 hover:border-[#A10728] hover:bg-[#A10728] shadow-lg cursor-pointer"
               title="Close Video (Esc)"
             >
               <span>Close [ESC]</span>
@@ -248,7 +248,7 @@ export function RealEstateIntroVideo({
 
         {/* Bottom Video Controls HUD */}
         <div
-          className={`absolute bottom-0 left-0 right-0 z-40 p-6 sm:p-10 bg-gradient-to-t from-[#071927] via-[#071927]/85 to-transparent transition-opacity duration-300 ${
+          className={`absolute bottom-0 left-0 right-0 z-40 p-6 sm:p-10 bg-gradient-to-t from-[#081220] via-[#081220]/85 to-transparent transition-opacity duration-300 ${
             showControls ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
@@ -258,7 +258,7 @@ export function RealEstateIntroVideo({
             className="group relative h-2 w-full cursor-pointer rounded-full bg-white/20 transition-all hover:h-3 overflow-hidden"
           >
             <div
-              className="h-full rounded-full bg-[#38BDF8] shadow-[0_0_10px_#38BDF8] transition-all duration-75"
+              className="h-full rounded-full bg-[#A10728] shadow-[0_0_10px_#A10728] transition-all duration-75"
               style={{
                 width: duration ? `${(currentTime / duration) * 100}%` : "0%",
               }}
@@ -271,7 +271,7 @@ export function RealEstateIntroVideo({
             <div className="flex items-center gap-3">
               <button
                 onClick={togglePlay}
-                className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#38BDF8]/40 bg-[#0B254A] text-white backdrop-blur-md transition-all hover:scale-105 hover:bg-[#0D7CD6] cursor-pointer"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#FAF9F6]/20 bg-[#012169] text-white backdrop-blur-md transition-all hover:scale-105 hover:bg-[#A10728] cursor-pointer"
                 title={isPlaying ? "Pause (Space)" : "Play (Space)"}
               >
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
@@ -279,7 +279,7 @@ export function RealEstateIntroVideo({
 
               <button
                 onClick={handleReplay}
-                className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#38BDF8]/30 bg-[#0B254A]/70 text-white backdrop-blur-md transition-all hover:scale-105 hover:bg-[#0D7CD6] cursor-pointer"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#FAF9F6]/20 bg-[#012169]/70 text-white backdrop-blur-md transition-all hover:scale-105 hover:bg-[#A10728] cursor-pointer"
                 title="Restart Video"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -287,12 +287,12 @@ export function RealEstateIntroVideo({
 
               <button
                 onClick={toggleMute}
-                className="flex items-center gap-2 rounded-lg border border-[#38BDF8]/30 bg-[#0B254A]/70 px-4 py-2.5 text-xs font-mono backdrop-blur-md transition-all text-white hover:bg-[#0D7CD6] cursor-pointer"
+                className="flex items-center gap-2 rounded-lg border border-[#FAF9F6]/20 bg-[#012169]/70 px-4 py-2.5 text-xs font-mono backdrop-blur-md transition-all text-white hover:bg-[#A10728] cursor-pointer"
                 title="Mute / Unmute (M)"
               >
                 {isMuted ? (
                   <>
-                    <VolumeX className="h-4 w-4 text-[#38BDF8]" />
+                    <VolumeX className="h-4 w-4 text-[#A10728]" />
                     <span className="hidden sm:inline">MUTED</span>
                   </>
                 ) : (
@@ -303,14 +303,14 @@ export function RealEstateIntroVideo({
                 )}
               </button>
 
-              <span className="font-mono text-xs text-[#BAE6FD] ml-2">
+              <span className="font-mono text-xs text-[#FAF9F6]/80 ml-2">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
 
             {/* Center Status Tag */}
-            <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-[#E0F2FE] bg-[#0B254A] px-4 py-2 rounded-full border border-[#38BDF8]/30 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-[#38BDF8] animate-pulse" />
+            <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-[#FAF9F6]/80 bg-[#012169] px-4 py-2 rounded-full border border-[#FAF9F6]/20 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-[#A10728] animate-pulse" />
               <span>THE PROPERTY FRANCHISE // COMMERCIAL ARCHITECTURAL CINEMATICS</span>
             </div>
 
