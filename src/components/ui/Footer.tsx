@@ -50,8 +50,8 @@ export function Footer() {
             1. TOP ROW: Brand Identity, Nav Columns & Telemetry Dispatch
            ======================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start pb-12 border-b border-[#FAF9F6]/15">
-          {/* Brand Mission & Active Telemetry Status */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
+          {/* Brand Mission Statement */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
             <div className="flex items-center gap-3.5">
               <div className="relative flex h-11 w-11 items-center justify-center rounded-full overflow-hidden border-2 border-[#A10728] bg-[#FCF8F3] shadow-md">
                 <img
@@ -64,23 +64,12 @@ export function Footer() {
                 <span className="font-['Condor_Med_Cond',sans-serif] text-base font-bold tracking-widest text-[#FAF9F6] uppercase block leading-none">
                   THE PROPERTY FRANCHISE
                 </span>
-                <span className="font-mono text-[9px] font-bold tracking-[0.2em] text-[#A10728] uppercase mt-1 block">
-                  AUSTRALIA &bull; GLOBAL METROPOLITAN HUBS
-                </span>
               </div>
             </div>
 
             <p className="font-sans text-sm sm:text-[15px] text-[#FAF9F6]/85 leading-relaxed max-w-md">
               The Property Franchise is an exclusive institutional commercial real estate network built for premier territory franchisees, REIT managers, and sovereign capital leaders.
             </p>
-
-            {/* Live CBD Transaction Desk Indicator (Australian Flag Blue & Crimson Red Accents) */}
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-[#012169] bg-[#012169]/60 px-3.5 py-1.5 backdrop-blur-md self-start text-xs font-mono shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-[#A10728] animate-pulse" />
-              <span className="text-[#FCF8F3] tracking-wider">
-                SYDNEY CBD DESK // BILATERAL MANDATES ACTIVE
-              </span>
-            </div>
           </div>
 
           {/* Navigation Columns */}
